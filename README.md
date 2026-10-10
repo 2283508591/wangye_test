@@ -1,5 +1,9 @@
 # 网页_test · 星际漫游
 
+**在线访问：[打开星际漫游](https://2283508591.github.io/wangye_test/)**
+
+公开网页，电脑与手机均可直接打开，无需 GitHub 账号。
+
 参考 https://motionsites.ai/?prompt=space-voyage 制作的独立沉浸式行星探索网页，支持电脑、平板与手机。
 
 ## 运行
@@ -66,3 +70,13 @@ npm run dev
 本地启动：`npm run dev`。网页文件位于 `dist/`，更新后将 `dist/` 内容发布到 `gh-pages` 分支。该分支根目录包含 `.nojekyll`，资源按静态文件直接提供。
 
 电脑和手机均可直接访问 GitHub Pages 提供的网址，无需下载项目或启动本地服务器。
+更新网站时，在仓库根目录完成修改后执行：
+
+```sh
+git add .
+git commit -m "更新网页"
+git push origin main
+git subtree push --prefix dist origin gh-pages
+```
+
+GitHub 会自动重新发布 `gh-pages` 分支，无需另外购买服务器。
