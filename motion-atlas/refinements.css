@@ -1,0 +1,9 @@
+/* The copy editor remains reachable from every section. */
+.edit-trigger{position:fixed;right:4.5%;top:32px;color:#26352d;background:#edf1e0cf;z-index:60;box-shadow:0 3px 20px #14231a0a}
+.arrow-button{background:#ffffff08}
+.site-header{padding-right:15%}
+.site-header nav{position:absolute;left:50%;transform:translateX(-50%)}
+.selected-section .section-top p{max-width:280px}
+.archive-section footer{background:linear-gradient(0deg,#090c0b,transparent);padding-top:20px}
+@media(max-width:900px){.edit-trigger{top:25px}.site-header nav{left:55%}}
+@media(max-width:600px){.edit-trigger{top:22px;right:6%}.site-header{padding-right:6%}}
