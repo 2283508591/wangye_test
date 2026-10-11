@@ -277,7 +277,9 @@
       const width=Math.round(rect.width*dpr),height=Math.round(rect.height*dpr);
       if(canvas.width===width&&canvas.height===height)return;
       canvas.width=width;canvas.height=height;ratio=rect.width/rect.height;
-      zoom=MotionLayout.archiveMetrics(rect.width,rect.height).zoom;strength=.05;
+      const phone=archive.classList.contains('mobile-archive');
+      zoom=(phone?MotionLayout.mobileArchiveMetrics:MotionLayout.archiveMetrics)(rect.width,rect.height).zoom;
+      strength=phone?0:.05;
       gl.viewport(0,0,canvas.width,canvas.height);requestDraw();
     }
     function render(time){
