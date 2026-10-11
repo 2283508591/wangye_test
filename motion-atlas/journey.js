@@ -6,9 +6,11 @@ const MotionJourney=(()=>{
     return [top,top+travel*.30,top+travel,archiveTop].map(y=>Math.max(0,Math.min(maxScroll,y)));
   }
   function nearest(points,y){return points.reduce((best,p,i)=>Math.abs(p-y)<Math.abs(points[best]-y)?i:best,0);}
-  function settle(points,start,end){
+  function settle(points,start,end,options={}){
     const delta=end-start;
-    if(Math.abs(delta)<24)return null;
+    const threshold=Math.min(80,Math.max(48,(options.view||800)*.07));
+    const flick=options.input==='touch'&&options.velocity>.45&&Math.abs(delta)>=28;
+    if(Math.abs(delta)<threshold&&!flick)return null;
     // A short screen may need ordinary scrolling inside the last page.
     if(start>=points[3]-2&&end>=points[3]-2)return null;
     const from=nearest(points,start);let to=nearest(points,end);
