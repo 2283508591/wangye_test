@@ -8,6 +8,13 @@ const MotionLayout=(()=>{
     const zoomX=width/(cols*tileWidth);
     return {ratio,zoom:[zoomX,zoomX*(cols*cw)/(rows*ch)/ratio]};
   }
+  // A small, rigid back plane leaves room for the phone's two foreground ribbons.
+  // Share the UV geometry with the canvas hit-test; no stretched poster cells.
+  function mobileArchiveMetrics(width,height){
+    const ratio=width/height,tileWidth=width/4.65;
+    const zoomX=width/(cols*tileWidth);
+    return {ratio,zoom:[zoomX,zoomX*(cols*cw)/(rows*ch)/ratio]};
+  }
   function archiveHit(nx,ny,{ratio,zoom},shift,z=1,strength=.05){
     const px=(nx*2-1)*ratio,py=1-ny*2,c=Math.cos(angle),s=Math.sin(angle);
     const u=(c*px+s*py)/(ratio*2)*zoom[0]*z+.5+shift[0];
@@ -22,6 +29,6 @@ const MotionLayout=(()=>{
     const column=((cellX%cols)+cols)%cols,glRow=((cellY%rows)+rows)%rows;
     return (rows-1-glRow)*cols+column;
   }
-  return {archiveMetrics,archiveHit,cols,rows,cw,ch,gutter};
+  return {archiveMetrics,mobileArchiveMetrics,archiveHit,cols,rows,cw,ch,gutter};
 })();
 if(typeof module==='object'&&module.exports)module.exports=MotionLayout;
