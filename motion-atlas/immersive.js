@@ -178,7 +178,6 @@
       const w=hitAt(e);if(w&&e.pointerType==='mouse'){caption.textContent=w.title+' / '+w.category+' ↗';caption.style.left=Math.min(rect.width-230,Math.max(15,e.clientX-rect.left+18))+'px';caption.style.top=Math.max(15,e.clientY-rect.top-42)+'px';caption.classList.add('visible');canvas.style.cursor='pointer';}else{caption.classList.remove('visible');canvas.style.cursor='grab';}
     });
     canvas.addEventListener('pointerleave',()=>{caption.classList.remove('visible');if(!down){targetX=panX;targetY=0;}requestDraw();});
-    document.getElementById('archive-filters').addEventListener('click',e=>{const b=e.target.closest('[data-category]');if(b){category=b.dataset.category;uploadAtlas();}});
     canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();contextLost=true;canvas.classList.remove('is-ready');archive.classList.remove('lens-ready');});
     lens={request:requestDraw,resize,entry:0,visible:false};resize();
     Promise.all(images.map(image=>image.decode().catch(()=>{}))).then(()=>{uploadAtlas();requestUpdate();});
