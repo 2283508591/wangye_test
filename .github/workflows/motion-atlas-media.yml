@@ -1,0 +1,49 @@
+name: Mirror Motion Atlas media
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/motion-atlas-media.yml'
+      - '.github/motion-atlas-media.json'
+      - 'tools/sync-public-media.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: motion-atlas-media
+  cancel-in-progress: false
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Download and verify public media
+        run: python tools/sync-public-media.py
+      - name: Save media in main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add motion-atlas/assets
+          if ! git diff --cached --quiet; then
+            git commit -m 'Host Motion Atlas backgrounds and films on GitHub'
+            git push origin HEAD:main
+          fi
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: published
+      - name: Save media in Pages branch
+        run: |
+          mkdir -p published/motion-atlas/assets
+          cp -a motion-atlas/assets/. published/motion-atlas/assets/
+          cd published
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add motion-atlas/assets
+          if ! git diff --cached --quiet; then
+            git commit -m 'Host Motion Atlas media on the Pages origin'
+            git push origin HEAD:gh-pages
+          fi
