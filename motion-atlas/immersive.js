@@ -17,6 +17,7 @@
   let frame=0,lastVisible=false,lens=null,currentProgress=0,geometry;
   let navigationFrame=0,navigating=false,settleTimer=0,gestureStart=null,touching=false,isScrolling=false,lastScrollY=scrollY;
   let downPoint=null,touchOrigin=null,ignoreTapUntil=0,lastDestination='';
+  let inputKind='scroll',peakVelocity=0,movementAt=performance.now();
   const properties=new Map();
   function setScene(name,value){if(properties.get(name)!==value){properties.set(name,value);stage.style.setProperty(name,value);}}
   function measure(){
@@ -29,6 +30,7 @@
     frame=0;if(!geometry)measure();
     const g=geometry,y=scrollY,bottom=g.top+g.height-y,archiveTop=g.archiveTop-y;
     const p=clamp((y-g.top)/g.travel);currentProgress=p;
+    MotionMedia.prepare(p,archiveTop,g.view);
     const push=smooth(.44,.84,p),gather=smooth(.49,.89,p),settled=smooth(.80,.94,p);
     const heroOpacity=smooth(.10,.21,p)*(1-smooth(.42,.55,p));
     // Scope changing variables to the pinned scene, and never read layout after writes.
@@ -91,31 +93,35 @@
     clearTimeout(settleTimer);
     if(navigating||touching||gestureStart===null)return;
     const start=gestureStart;gestureStart=null;isScrolling=false;
-    const destination=MotionJourney.settle(geometry.points,start,scrollY);
+    const destination=MotionJourney.settle(geometry.points,start,scrollY,{view:geometry.view,input:inputKind,velocity:peakVelocity});
+    peakVelocity=0;
     if(destination)scrollToPhase(destination);else lens?.request();
   }
-  function queueSettle(){clearTimeout(settleTimer);settleTimer=setTimeout(settleGesture,220);}
-  function beginGesture(){cancelNavigation();if(gestureStart===null)gestureStart=lastScrollY;}
-  addEventListener('wheel',e=>{if(!e.shiftKey&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)&&!e.target.closest('dialog,.editor'))beginGesture();},{passive:true});
+  function queueSettle(){clearTimeout(settleTimer);settleTimer=setTimeout(settleGesture,280);}
+  function beginGesture(kind=inputKind){cancelNavigation();inputKind=kind;if(gestureStart===null){gestureStart=lastScrollY;peakVelocity=0;movementAt=performance.now();}}
+  addEventListener('wheel',e=>{if(!e.shiftKey&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)&&!e.target.closest('dialog,.editor'))beginGesture('wheel');},{passive:true});
   addEventListener('pointerdown',e=>{
     if(e.target.closest('dialog,.editor'))return;
-    beginGesture();gestureStart=scrollY;touching=e.pointerType==='touch';downPoint={x:e.clientX,y:e.clientY};
+    beginGesture(e.pointerType==='touch'?'touch':'scroll');gestureStart=scrollY;touching=e.pointerType==='touch';downPoint={x:e.clientX,y:e.clientY};
   },{passive:true});
   addEventListener('pointerup',e=>{if(downPoint&&Math.hypot(e.clientX-downPoint.x,e.clientY-downPoint.y)>12)ignoreTapUntil=performance.now()+450;touching=false;downPoint=null;queueSettle();},{passive:true});
   // Native mobile panning cancels pointer events before the finger is released.
   // Track touch end separately so settling never interrupts a held gesture.
   addEventListener('pointercancel',()=>{ignoreTapUntil=performance.now()+450;downPoint=null;queueSettle();},{passive:true});
-  addEventListener('touchstart',e=>{if(e.target.closest('dialog,.editor'))return;touching=true;touchOrigin=e.touches[0];beginGesture();gestureStart=scrollY;},{passive:true});
+  addEventListener('touchstart',e=>{if(e.target.closest('dialog,.editor'))return;touching=true;touchOrigin=e.touches[0];beginGesture('touch');gestureStart=scrollY;},{passive:true});
   function finishTouch(e){const end=e.changedTouches[0];if(touchOrigin&&end&&Math.hypot(end.clientX-touchOrigin.clientX,end.clientY-touchOrigin.clientY)>12)ignoreTapUntil=performance.now()+450;touchOrigin=null;touching=!!e.touches.length;queueSettle();}
   addEventListener('touchend',finishTouch,{passive:true});
   addEventListener('touchcancel',finishTouch,{passive:true});
   addEventListener('scroll',()=>{
-    const y=scrollY;
+    const y=scrollY,now=performance.now(),dt=now-movementAt;
+    if(!navigating&&dt>0&&dt<120)peakVelocity=Math.max(peakVelocity,Math.abs(y-lastScrollY)/dt);
+    movementAt=now;
     // Scrollbars and embedded browser panning can scroll without wheel/pointer events.
     if(!navigating&&Math.abs(y-lastScrollY)>.5){gestureStart??=lastScrollY;isScrolling=true;queueSettle();}
     lastScrollY=y;requestUpdate();
   },{passive:true});
-  addEventListener('scrollend',settleGesture,{passive:true});
+  // Wait for both native inertia and the last input burst before aligning a scene.
+  addEventListener('scrollend',queueSettle,{passive:true});
   sceneButton.addEventListener('click',nextScene);
   advance.addEventListener('click',nextScene);
   stage.addEventListener('click',e=>{
@@ -123,7 +129,7 @@
     nextScene();
   });
   document.querySelectorAll('a[href="#home"],a[href="#about"],a[href="#selected"],a[href="#archive"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();scrollToPhase(a.getAttribute('href').slice(1));}));
-  document.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key)&&!e.target.closest('button,a,input,textarea,select,dialog,.editor,#carousel'))beginGesture();});
+  document.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key)&&!e.target.closest('button,a,input,textarea,select,dialog,.editor,#carousel'))beginGesture('keyboard');});
   document.getElementById('field-select').addEventListener('change',e=>{
     const field=e.target.value;
     scrollToPhase(field.startsWith('selected')?'selected':field.startsWith('contact')||field==='footerName'?'archive':'about');
@@ -137,6 +143,7 @@
   function queueResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(refreshSize,140);}
   addEventListener('resize',queueResize,{passive:true});
   addEventListener('orientationchange',queueResize,{passive:true});
+  addEventListener('hashchange',()=>{const id=location.hash.slice(1);if(MotionJourney.names.includes(id))scrollToPhase(id);});
   addEventListener('pageshow',()=>{measure();requestUpdate();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){measure();requestUpdate();}});
   measure();updateJourney();
@@ -185,10 +192,10 @@
     const position=gl.getAttribLocation(program,'a_position');gl.enableVertexAttribArray(position);gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
     const texture=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,texture);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
     const uniforms=Object.fromEntries(['u_aspect','u_zoom','u_shift','u_strength'].map(n=>[n,gl.getUniformLocation(program,n)]));
-    const atlas=document.createElement('canvas');atlas.width=2304;atlas.height=892;
+    const atlas=document.createElement('canvas');atlas.width=MotionMedia.compact?1728:2304;atlas.height=MotionMedia.compact?669:892;
     const ctx=atlas.getContext('2d');const cols=6,rows=4,cw=atlas.width/cols,ch=atlas.height/rows;
     const atlasWorks=[...workList,...[8,13,6,16,11].map(i=>workList[i]).filter(Boolean)];
-    const images=atlasWorks.map(w=>{const im=new Image();im.src=w.poster;return im;});
+    const images=atlasWorks.map(w=>{const im=new Image();im.src=MotionMedia.poster(w);return im;});
     let category='全部',renderFrame=0,ready=false,shiftX=0,shiftY=0,targetX=0,targetY=0,panX=0,ratio=1,zoom=[1,1],strength=.10,contextLost=false;
     // Texture-space drift is separate from the user's drag and pointer parallax.
     // Negative texture movement makes the visible wall travel gently to the right.
@@ -198,7 +205,8 @@
     function uploadAtlas(){
       ctx.fillStyle='#140d1b';ctx.fillRect(0,0,atlas.width,atlas.height);
       atlasWorks.forEach((w,i)=>{
-        const image=images[i],x=(i%cols)*cw+8,y=Math.floor(i/cols)*ch+8,width=cw-16,height=ch-16;
+        const unit=MotionMedia.compact?.75:1;
+        const image=images[i],x=(i%cols)*cw+8*unit,y=Math.floor(i/cols)*ch+8*unit,width=cw-16*unit,height=ch-16*unit;
         ctx.save();roundedRect(x,y,width,height,20);ctx.clip();ctx.fillStyle='#29232f';ctx.fillRect(x,y,width,height);
         if(image.complete&&image.naturalWidth){const cover=Math.max(width/image.naturalWidth,height/image.naturalHeight),sw=width/cover,sh=height/cover;ctx.drawImage(image,(image.naturalWidth-sw)/2,(image.naturalHeight-sh)/2,sw,sh,x,y,width,height);}
         if(category!=='全部'&&w.category!==category){ctx.fillStyle='#100a17e8';ctx.fillRect(x,y,width,height);}
@@ -209,7 +217,7 @@
       ready=true;canvas.classList.add('is-ready');archive.classList.add('lens-ready');requestDraw();
     }
     function resize(){
-      const rect=archive.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,innerWidth<600?1:innerWidth<1100?1.25:1.5);
+      const rect=archive.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,MotionMedia.light?.85:innerWidth<600?1:innerWidth<1100?1.25:1.5);
       const width=Math.round(rect.width*dpr),height=Math.round(rect.height*dpr);
       if(canvas.width===width&&canvas.height===height)return;
       canvas.width=width;canvas.height=height;ratio=rect.width/rect.height;
@@ -226,7 +234,7 @@
         driftX=(driftX-driftPixelsPerSecond*elapsed/width*zoom[0]*z)%1;
       }
       // Thirty draws per second are ample for this slow movement on phones/tablets.
-      if(!reduced&&time-lastDraw<1000/30){requestDraw();return;}lastDraw=time;
+      if(!reduced&&time-lastDraw<1000/(MotionMedia.light?24:30)){requestDraw();return;}lastDraw=time;
       shiftX+=(targetX-shiftX)*.12;shiftY+=(targetY-shiftY)*.12;
       gl.useProgram(program);gl.uniform1f(uniforms.u_aspect,ratio);gl.uniform2f(uniforms.u_zoom,zoom[0]*(.96+.04*lens.entry),zoom[1]*(.96+.04*lens.entry));gl.uniform1f(uniforms.u_strength,strength);gl.uniform2f(uniforms.u_shift,shiftX+driftX,shiftY);gl.drawArrays(gl.TRIANGLES,0,6);
       if(!reduced||Math.abs(targetX-shiftX)+Math.abs(targetY-shiftY)>.00008)requestDraw();
@@ -252,6 +260,10 @@
     lens={request:requestDraw,resize,entry:0,visible:false};resize();
     Promise.all(images.map(image=>image.decode().catch(()=>{}))).then(()=>{uploadAtlas();requestUpdate();});
   }
-  document.addEventListener('motionworksready',e=>{initLens(e.detail);document.querySelectorAll('.intro-reel').forEach(b=>{const w=e.detail[+b.dataset.workIndex];if(!w)return;b.querySelector('img').src=w.poster;b.setAttribute('aria-label','预览作品 '+w.title);b.addEventListener('click',()=>openPlayer(w));});});
-  if(typeof works!=='undefined'&&works.length)initLens(works);
+  let archivePrepared=!MotionMedia.compact,introPrepared=!MotionMedia.compact,workData=[];
+  function prepareIntro(){document.querySelectorAll('.intro-reel').forEach(b=>{const w=workData[+b.dataset.workIndex];if(!w)return;const image=b.querySelector('img');image.decoding='async';image.src=MotionMedia.poster(w);b.setAttribute('aria-label','预览作品 '+w.title);if(!b.dataset.bound){b.dataset.bound='true';b.addEventListener('click',()=>openPlayer(w));}});}
+  MotionMedia.on('intro',()=>{introPrepared=true;prepareIntro();});
+  MotionMedia.on('archive',()=>{archivePrepared=true;if(workData.length)initLens(workData);});
+  document.addEventListener('motionworksready',e=>{workData=e.detail;if(archivePrepared)initLens(workData);if(introPrepared)prepareIntro();});
+  if(typeof works!=='undefined'&&works.length){workData=works;if(archivePrepared)initLens(works);if(introPrepared)prepareIntro();}
 })();

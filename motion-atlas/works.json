@@ -6,7 +6,12 @@
     "src": "assets/work-01.mp4",
     "poster": "assets/work-01.jpg",
     "duration": 17,
-    "sourceName": "手持风扇动画定稿.mp4"
+    "sourceName": "手持风扇动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-01.webp",
+      "preview": "assets/mobile-v9/work-01-preview.mp4",
+      "src": "assets/mobile-v9/work-01.mp4"
+    }
   },
   {
     "id": "work-02",
@@ -15,7 +20,12 @@
     "src": "assets/work-02.mp4",
     "poster": "assets/work-02.jpg",
     "duration": 35,
-    "sourceName": "手柄动画.mp4"
+    "sourceName": "手柄动画.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-02.webp",
+      "preview": "assets/mobile-v9/work-02-preview.mp4",
+      "src": "assets/mobile-v9/work-02.mp4"
+    }
   },
   {
     "id": "work-03",
@@ -24,7 +34,12 @@
     "src": "assets/work-03.mp4",
     "poster": "assets/work-03.jpg",
     "duration": 27,
-    "sourceName": "童鞋动画完整版.mp4"
+    "sourceName": "童鞋动画完整版.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-03.webp",
+      "preview": "assets/mobile-v9/work-03-preview.mp4",
+      "src": "assets/mobile-v9/work-03.mp4"
+    }
   },
   {
     "id": "work-04",
@@ -33,7 +48,12 @@
     "src": "assets/work-04.mp4",
     "poster": "assets/work-04.jpg",
     "duration": 15,
-    "sourceName": "粉色金属环手机壳_15秒_16比9_slp.mp4"
+    "sourceName": "粉色金属环手机壳_15秒_16比9_slp.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-04.webp",
+      "preview": "assets/mobile-v9/work-04-preview.mp4",
+      "src": "assets/mobile-v9/work-04.mp4"
+    }
   },
   {
     "id": "work-05",
@@ -42,7 +62,12 @@
     "src": "assets/work-05.mp4",
     "poster": "assets/work-05.jpg",
     "duration": 30,
-    "sourceName": "耳机广告定稿_slp.mp4"
+    "sourceName": "耳机广告定稿_slp.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-05.webp",
+      "preview": "assets/mobile-v9/work-05-preview.mp4",
+      "src": "assets/mobile-v9/work-05.mp4"
+    }
   },
   {
     "id": "work-06",
@@ -51,7 +76,12 @@
     "src": "assets/work-06.mp4",
     "poster": "assets/work-06.jpg",
     "duration": 18,
-    "sourceName": "F10三维动画定稿输出.mp4"
+    "sourceName": "F10三维动画定稿输出.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-06.webp",
+      "preview": "assets/mobile-v9/work-06-preview.mp4",
+      "src": "assets/mobile-v9/work-06.mp4"
+    }
   },
   {
     "id": "work-07",
@@ -60,7 +90,12 @@
     "src": "assets/work-07.mp4",
     "poster": "assets/work-07.jpg",
     "duration": 18,
-    "sourceName": "S10完整动画定稿.mp4"
+    "sourceName": "S10完整动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-07.webp",
+      "preview": "assets/mobile-v9/work-07-preview.mp4",
+      "src": "assets/mobile-v9/work-07.mp4"
+    }
   },
   {
     "id": "work-08",
@@ -69,7 +104,12 @@
     "src": "assets/work-08.mp4",
     "poster": "assets/work-08.jpg",
     "duration": 20,
-    "sourceName": "S20完整动画定稿.mp4"
+    "sourceName": "S20完整动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-08.webp",
+      "preview": "assets/mobile-v9/work-08-preview.mp4",
+      "src": "assets/mobile-v9/work-08.mp4"
+    }
   },
   {
     "id": "work-09",
@@ -78,7 +118,12 @@
     "src": "assets/work-09.mp4",
     "poster": "assets/work-09.jpg",
     "duration": 21,
-    "sourceName": "S30完整动画定稿.mp4"
+    "sourceName": "S30完整动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-09.webp",
+      "preview": "assets/mobile-v9/work-09-preview.mp4",
+      "src": "assets/mobile-v9/work-09.mp4"
+    }
   },
   {
     "id": "work-10",
@@ -87,7 +132,12 @@
     "src": "assets/work-10.mp4",
     "poster": "assets/work-10.jpg",
     "duration": 14,
-    "sourceName": "T30S完整动画定稿.mp4"
+    "sourceName": "T30S完整动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-10.webp",
+      "preview": "assets/mobile-v9/work-10-preview.mp4",
+      "src": "assets/mobile-v9/work-10.mp4"
+    }
   },
   {
     "id": "work-11",
@@ -96,7 +146,12 @@
     "src": "assets/work-11.mp4",
     "poster": "assets/work-11.jpg",
     "duration": 32,
-    "sourceName": "中网灯三维动画输出3.0.mp4"
+    "sourceName": "中网灯三维动画输出3.0.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-11.webp",
+      "preview": "assets/mobile-v9/work-11-preview.mp4",
+      "src": "assets/mobile-v9/work-11.mp4"
+    }
   },
   {
     "id": "work-12",
@@ -105,7 +160,12 @@
     "src": "assets/work-12.mp4",
     "poster": "assets/work-12.jpg",
     "duration": 36,
-    "sourceName": "传奇Max中英字幕定稿_2.mp4"
+    "sourceName": "传奇Max中英字幕定稿_2.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-12.webp",
+      "preview": "assets/mobile-v9/work-12-preview.mp4",
+      "src": "assets/mobile-v9/work-12.mp4"
+    }
   },
   {
     "id": "work-13",
@@ -114,7 +174,12 @@
     "src": "assets/work-13.mp4",
     "poster": "assets/work-13.jpg",
     "duration": 29,
-    "sourceName": "包装盒三维动画输出.mp4"
+    "sourceName": "包装盒三维动画输出.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-13.webp",
+      "preview": "assets/mobile-v9/work-13-preview.mp4",
+      "src": "assets/mobile-v9/work-13.mp4"
+    }
   },
   {
     "id": "work-14",
@@ -123,7 +188,12 @@
     "src": "assets/work-14.mp4",
     "poster": "assets/work-14.jpg",
     "duration": 40,
-    "sourceName": "卡车专用车灯动画输出最终稿.mp4"
+    "sourceName": "卡车专用车灯动画输出最终稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-14.webp",
+      "preview": "assets/mobile-v9/work-14-preview.mp4",
+      "src": "assets/mobile-v9/work-14.mp4"
+    }
   },
   {
     "id": "work-15",
@@ -132,7 +202,12 @@
     "src": "assets/work-15.mp4",
     "poster": "assets/work-15.jpg",
     "duration": 41,
-    "sourceName": "神马贺岁产品动画终稿2.0.mp4"
+    "sourceName": "神马贺岁产品动画终稿2.0.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-15.webp",
+      "preview": "assets/mobile-v9/work-15-preview.mp4",
+      "src": "assets/mobile-v9/work-15.mp4"
+    }
   },
   {
     "id": "work-16",
@@ -141,7 +216,12 @@
     "src": "assets/work-16.mp4",
     "poster": "assets/work-16.jpg",
     "duration": 40,
-    "sourceName": "臻亮LED头灯三维动画.mp4"
+    "sourceName": "臻亮LED头灯三维动画.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-16.webp",
+      "preview": "assets/mobile-v9/work-16-preview.mp4",
+      "src": "assets/mobile-v9/work-16.mp4"
+    }
   },
   {
     "id": "work-17",
@@ -150,7 +230,12 @@
     "src": "assets/work-17.mp4",
     "poster": "assets/work-17.jpg",
     "duration": 40,
-    "sourceName": "臻选系列三维动画输出1.0.mp4"
+    "sourceName": "臻选系列三维动画输出1.0.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-17.webp",
+      "preview": "assets/mobile-v9/work-17-preview.mp4",
+      "src": "assets/mobile-v9/work-17.mp4"
+    }
   },
   {
     "id": "work-18",
@@ -159,7 +244,12 @@
     "src": "assets/work-18.mp4",
     "poster": "assets/work-18.jpg",
     "duration": 41,
-    "sourceName": "领界者动画最终定稿.mp4"
+    "sourceName": "领界者动画最终定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-18.webp",
+      "preview": "assets/mobile-v9/work-18-preview.mp4",
+      "src": "assets/mobile-v9/work-18.mp4"
+    }
   },
   {
     "id": "work-19",
@@ -168,6 +258,11 @@
     "src": "assets/work-19.mp4",
     "poster": "assets/work-19.jpg",
     "duration": 29,
-    "sourceName": "风暴3.0_动画定稿.mp4"
+    "sourceName": "风暴3.0_动画定稿.mp4",
+    "mobile": {
+      "poster": "assets/mobile-v9/work-19.webp",
+      "preview": "assets/mobile-v9/work-19-preview.mp4",
+      "src": "assets/mobile-v9/work-19.mp4"
+    }
   }
 ]
