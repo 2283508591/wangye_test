@@ -18,6 +18,15 @@ const MotionJourney=(()=>{
     return names[to];
   }
   function next(progress,archiveVisible){return archiveVisible?'home':progress<.16?'about':progress<.89?'selected':'archive';}
-  return {names,stops,nearest,settle,next};
+  // Exact critically damped response: retain momentum when input changes,
+  // and use elapsed seconds so 60 Hz and 120 Hz displays behave alike.
+  function damp(state,target,seconds,smoothTime=.18){
+    const omega=2/smoothTime,dt=Math.max(0,seconds),decay=Math.exp(-omega*dt);
+    const change=state.value-target,temp=(state.velocity+omega*change)*dt;
+    return {value:target+(change+temp)*decay,velocity:(state.velocity-omega*temp)*decay};
+  }
+  function ease(t){t=Math.max(0,Math.min(1,t));return t*t*t*(t*(t*6-15)+10);}
+  function wheelPixels(delta,mode,view){return delta*(mode===1?16:mode===2?view:1);}
+  return {names,stops,nearest,settle,next,damp,ease,wheelPixels};
 })();
 if(typeof module==='object'&&module.exports)module.exports=MotionJourney;

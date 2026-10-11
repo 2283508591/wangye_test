@@ -122,8 +122,8 @@ body:has(#editor:not([hidden])) .hero [data-copy]{pointer-events:auto;cursor:tex
 .journey-sticky{height:100vh;height:100dvh;min-height:0}.archive-section{height:100vh;height:100dvh}
 
 /* Independent compact delivery tier: desktop images and visual layout stay intact. */
-.compact-media .dream-portal{background-image:url('assets/mobile-v9/portal-landscape.webp')}
-@media(orientation:portrait){.compact-media .dream-portal{background-image:url('assets/mobile-v9/portal.webp')}}
+.compact-media .dream-portal{background-image:url('assets/mobile-v11/portal-landscape.webp')}
+@media(orientation:portrait){.compact-media .dream-portal{background-image:url('assets/mobile-v11/portal.webp')}}
 .compact-media .dream-cloudscape{background-image:var(--mobile-cloud,none)}
 .compact-media .dream-cloudscape:after{filter:blur(4px)}
 .compact-media .site-header nav{backdrop-filter:blur(8px)}
@@ -171,3 +171,11 @@ dialog::backdrop{background:#08060e66;backdrop-filter:blur(4px);-webkit-backdrop
  .journey-rail>span:last-child{display:none}
  .archive-section footer{padding-right:105px}
 }
+
+/* High-density mobile artwork: preserve detail without a blurry CSS upsample. */
+@media(max-width:1100px),(pointer:coarse) and (max-width:1400px){
+ :root{--archive-softness:.25px}
+ .compact-media .archive-tile img{image-rendering:auto}
+}
+
+html,body,.journey,.archive-section{overflow-anchor:none}

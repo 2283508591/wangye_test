@@ -1,4 +1,7 @@
 'use strict';
+// The pinned scenes own their hash destinations. Browser restoration after
+// load must not overwrite an already aligned scene with an old pixel offset.
+if('scrollRestoration' in history)history.scrollRestoration='manual';
 // Select a delivery tier once per visit, so rotating a phone never downloads both tiers.
 const MotionMedia=(()=>{
   const compact=matchMedia('(max-width:1100px), (pointer:coarse) and (max-width:1400px)').matches;
@@ -17,7 +20,7 @@ const MotionMedia=(()=>{
     if(progress>=.46)mark('selected');
     if(archiveDistance<view*1.6)mark('archive');
   }
-  on('clouds',()=>{if(compact)document.documentElement.style.setProperty('--mobile-cloud',"url('assets/mobile-v9/clouds.webp')");});
+  on('clouds',()=>{if(compact)document.documentElement.style.setProperty('--mobile-cloud',"url('assets/mobile-v11/clouds.webp')");});
   const poster=w=>compact&&w.mobile?w.mobile.poster:w.poster;
   const preview=w=>compact&&w.mobile?w.mobile.preview:w.src;
   const playback=(w,quality='smooth')=>compact&&quality!=='hd'&&w.mobile?w.mobile.src:w.src;
