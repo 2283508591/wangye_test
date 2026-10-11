@@ -2,84 +2,152 @@
 (() => {
   const journey=document.getElementById('journey');
   const stage=journey.querySelector('.journey-sticky');
-  const root=document.documentElement;
   const hero=document.querySelector('.hero');
   const advance=document.getElementById('journey-advance');
   const selected=document.getElementById('selected');
   const archive=document.getElementById('archive');
+  const sceneButton=document.getElementById('scene-next');
+  const sceneLabel=document.getElementById('scene-next-label');
+  const sceneIcon=document.getElementById('scene-next-icon');
+  const phaseLabel=document.querySelector('.journey-phase');
+  const navLinks=[...document.querySelectorAll('.nav-link')];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp=v=>Math.min(1,Math.max(0,v));
   const smooth=(a,b,v)=>{const t=clamp((v-a)/(b-a));return t*t*(3-2*t);};
-  let frame=0,lastVisible=false,lens=null,currentProgress=0;
+  let frame=0,lastVisible=false,lens=null,currentProgress=0,geometry;
+  let navigationFrame=0,navigating=false,settleTimer=0,gestureStart=null,touching=false,isScrolling=false,lastScrollY=scrollY;
+  let downPoint=null,touchOrigin=null,ignoreTapUntil=0,lastDestination='';
+  const properties=new Map();
+  function setScene(name,value){if(properties.get(name)!==value){properties.set(name,value);stage.style.setProperty(name,value);}}
+  function measure(){
+    const j=journey.getBoundingClientRect(),a=archive.getBoundingClientRect();
+    geometry={top:j.top+scrollY,height:journey.offsetHeight,stage:stage.offsetHeight,archiveTop:a.top+scrollY,archiveHeight:archive.offsetHeight,view:innerHeight,width:innerWidth};
+    geometry.travel=Math.max(1,geometry.height-geometry.stage);
+    geometry.points=MotionJourney.stops(geometry.top,geometry.travel,geometry.archiveTop,document.documentElement.scrollHeight-innerHeight);
+  }
   function updateJourney(){
-    frame=0;
-    const bounds=journey.getBoundingClientRect();
-    const height=stage.getBoundingClientRect().height;
-    const p=clamp(-bounds.top/Math.max(1,journey.offsetHeight-height));currentProgress=p;
+    frame=0;if(!geometry)measure();
+    const g=geometry,y=scrollY,bottom=g.top+g.height-y,archiveTop=g.archiveTop-y;
+    const p=clamp((y-g.top)/g.travel);currentProgress=p;
     const push=smooth(.44,.84,p),gather=smooth(.49,.89,p),settled=smooth(.80,.94,p);
     const heroOpacity=smooth(.10,.21,p)*(1-smooth(.42,.55,p));
-    root.style.setProperty('--portal-scale',reduced?1:1+smooth(.02,.29,p)*.17+push*4.2);
-    root.style.setProperty('--portal-alpha',1-smooth(.66,.84,p));
-    root.style.setProperty('--cloud-scale',reduced?1:1.1+push*.12);
-    root.style.setProperty('--backdrop-blur',(smooth(.71,.91,p)*(innerWidth<600?6:9)).toFixed(2)+'px');
-    root.style.setProperty('--scene-dim',(.14+settled*.29).toFixed(3));
-    root.style.setProperty('--hero-alpha',heroOpacity.toFixed(3));
-    root.style.setProperty('--entry-hint-alpha',(1-smooth(.08,.16,p)).toFixed(3));
-    root.style.setProperty('--rail-alpha',Math.max(heroOpacity,settled).toFixed(3));
-    root.style.setProperty('--selected-alpha',settled.toFixed(3));
-    root.style.setProperty('--film-alpha',smooth(.50,.65,p).toFixed(3));
-    root.style.setProperty('--entry-offset',((reduced?26:67)*(1-gather)).toFixed(3));
-    root.style.setProperty('--entry-drop',((innerWidth<600?65:105)*(1-gather)).toFixed(3));
-    root.style.setProperty('--entry-turn',((reduced?0:19)*(1-gather)).toFixed(3));
-    root.style.setProperty('--entry-tilt',((reduced?0:8)*(1-gather)).toFixed(3));
-    root.style.setProperty('--journey-progress',p.toFixed(4));
+    // Scope changing variables to the pinned scene, and never read layout after writes.
+    setScene('--portal-scale',(reduced?1:1+smooth(.02,.29,p)*.17+push*4.2).toFixed(3));
+    setScene('--portal-alpha',(1-smooth(.66,.84,p)).toFixed(3));
+    setScene('--cloud-scale',(reduced?1:1.1+push*.12).toFixed(3));
+    setScene('--cloud-soft-alpha',smooth(.71,.91,p).toFixed(3));
+    setScene('--scene-dim',(.14+settled*.29).toFixed(3));
+    setScene('--hero-alpha',heroOpacity.toFixed(3));
+    setScene('--entry-hint-alpha',(1-smooth(.08,.16,p)).toFixed(3));
+    setScene('--rail-alpha',Math.max(heroOpacity,settled).toFixed(3));
+    setScene('--selected-alpha',settled.toFixed(3));
+    setScene('--film-alpha',smooth(.50,.65,p).toFixed(3));
+    setScene('--entry-offset',((reduced?26:67)*(1-gather)).toFixed(3));
+    setScene('--entry-drop',((g.width<600?65:105)*(1-gather)).toFixed(3));
+    setScene('--entry-turn',((reduced?0:19)*(1-gather)).toFixed(3));
+    setScene('--entry-tilt',((reduced?0:8)*(1-gather)).toFixed(3));
+    setScene('--journey-progress',p.toFixed(4));
     journey.classList.toggle('is-gathering',p<.91);
-    hero.inert=heroOpacity<.4;selected.inert=p<.89||bounds.bottom<height*.25;
-    advance.disabled=p>=.89||bounds.bottom<height*.5;
+    hero.inert=heroOpacity<.4;selected.inert=p<.89||bottom<g.stage*.25;
+    advance.disabled=p>=.89||bottom<g.stage*.5;
     advance.setAttribute('aria-label',p<.16?'进入个人信息':'进入精选作品');
-    document.querySelector('.journey-phase').textContent=p<.49?'01 / INTO THE DREAM':'02 / SELECTED MOTION';
-    const visible=p>.89&&bounds.bottom>height*.65&&bounds.top<0;
+    phaseLabel.textContent=p<.49?'01 / INTO THE DREAM':'02 / SELECTED MOTION';
+    const visible=p>.89&&bottom>g.stage*.65&&y>g.top;
     if(visible!==lastVisible){lastVisible=visible;document.dispatchEvent(new CustomEvent('journeyvisibility',{detail:visible}));}
-    const archiveBounds=archive.getBoundingClientRect();
-    const entry=clamp((innerHeight-archiveBounds.top)/innerHeight);
-    root.style.setProperty('--archive-entry',entry.toFixed(3));
-    const navTarget=archiveBounds.top<innerHeight*.48?'#archive':p>.63?'#selected':'#about';
-    document.querySelectorAll('.nav-link').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===navTarget));
-    if(lens){lens.entry=entry;lens.visible=archiveBounds.top<innerHeight&&archiveBounds.bottom>0;lens.request();}
-    document.body.dataset.journeyPhase=p<.12?'entrance':p<.49?'about':p<.89?'gather':'films';
+    const entry=clamp((g.view-archiveTop)/g.view);
+    const navTarget=archiveTop<g.view*.48?'#archive':p>.63?'#selected':'#about';
+    navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')===navTarget));
+    const destination=MotionJourney.next(p,archiveTop<g.view*.5);
+    if(destination!==lastDestination){
+      lastDestination=destination;sceneButton.dataset.destination=destination;
+      sceneButton.setAttribute('aria-label',({about:'进入个人信息',selected:'进入精选作品',archive:'进入全部作品',home:'返回顶部'})[destination]);
+      sceneLabel.textContent=({about:'个人信息',selected:'进入作品',archive:'下一页',home:'返回顶部'})[destination];
+      sceneIcon.textContent=destination==='home'?'↑':'↓';
+      sceneButton.classList.toggle('is-return',destination==='home');
+    }
+    if(lens){lens.entry=entry;lens.visible=archiveTop<g.view&&archiveTop+g.archiveHeight>0;lens.request();}
+    document.body.dataset.journeyPhase=archiveTop<g.view*.5?'archive':p<.12?'entrance':p<.49?'about':p<.89?'gather':'films';
   }
   function requestUpdate(){if(!frame)frame=requestAnimationFrame(updateJourney);}
+  function cancelNavigation(){cancelAnimationFrame(navigationFrame);navigationFrame=0;navigating=false;}
   function scrollToPhase(id,behavior=reduced?'auto':'smooth'){
-    const top=journey.getBoundingClientRect().top+scrollY;
-    const travel=journey.offsetHeight-stage.getBoundingClientRect().height;
-    const y=id==='selected'?top+travel*.97:id==='about'?top+travel*.30:id==='home'?top:id==='archive'?archive.getBoundingClientRect().top+scrollY:null;
-    if(y!==null)window.scrollTo({top:y,behavior});
+    const index=MotionJourney.names.indexOf(id);if(index<0)return;
+    cancelNavigation();clearTimeout(settleTimer);gestureStart=null;isScrolling=false;measure();
+    const start=scrollY,target=geometry.points[index];
+    history.replaceState(null,'','#'+id);
+    if(behavior==='auto'||Math.abs(target-start)<2){lastScrollY=target;window.scrollTo(0,target);requestUpdate();return;}
+    navigating=true;let started;
+    const duration=Math.min(680,Math.max(360,Math.abs(target-start)*.23));
+    function step(time){
+      started??=time;const t=clamp((time-started)/duration),ease=1-Math.pow(1-t,3);
+      window.scrollTo(0,start+(target-start)*ease);requestUpdate();
+      if(t<1)navigationFrame=requestAnimationFrame(step);
+      else{navigationFrame=0;navigating=false;window.scrollTo(0,target);requestUpdate();lens?.request();}
+    }
+    navigationFrame=requestAnimationFrame(step);
   }
-  document.querySelectorAll('a[href="#home"],a[href="#about"],a[href="#selected"],a[href="#archive"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const id=a.getAttribute('href').slice(1);history.replaceState(null,'','#'+id);scrollToPhase(id);}));
-  advance.addEventListener('click',()=>{if(!document.getElementById('editor').hidden)return;const next=currentProgress<.16?'about':'selected';history.replaceState(null,'','#'+next);scrollToPhase(next);});
-  document.addEventListener('keydown',e=>{if(e.key==='ArrowDown'&&e.target===advance){e.preventDefault();advance.click();}});
-  // Bring the relevant scene into view when selecting a field in the copy editor.
+  function nextScene(){if(document.getElementById('player-dialog').open||!document.getElementById('editor').hidden)return;scrollToPhase(lastDestination||'about');}
+  function settleGesture(){
+    clearTimeout(settleTimer);
+    if(navigating||touching||gestureStart===null)return;
+    const start=gestureStart;gestureStart=null;isScrolling=false;
+    const destination=MotionJourney.settle(geometry.points,start,scrollY);
+    if(destination)scrollToPhase(destination);else lens?.request();
+  }
+  function queueSettle(){clearTimeout(settleTimer);settleTimer=setTimeout(settleGesture,220);}
+  function beginGesture(){cancelNavigation();if(gestureStart===null)gestureStart=lastScrollY;}
+  addEventListener('wheel',e=>{if(!e.shiftKey&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)&&!e.target.closest('dialog,.editor'))beginGesture();},{passive:true});
+  addEventListener('pointerdown',e=>{
+    if(e.target.closest('dialog,.editor'))return;
+    beginGesture();gestureStart=scrollY;touching=e.pointerType==='touch';downPoint={x:e.clientX,y:e.clientY};
+  },{passive:true});
+  addEventListener('pointerup',e=>{if(downPoint&&Math.hypot(e.clientX-downPoint.x,e.clientY-downPoint.y)>12)ignoreTapUntil=performance.now()+450;touching=false;downPoint=null;queueSettle();},{passive:true});
+  // Native mobile panning cancels pointer events before the finger is released.
+  // Track touch end separately so settling never interrupts a held gesture.
+  addEventListener('pointercancel',()=>{ignoreTapUntil=performance.now()+450;downPoint=null;queueSettle();},{passive:true});
+  addEventListener('touchstart',e=>{if(e.target.closest('dialog,.editor'))return;touching=true;touchOrigin=e.touches[0];beginGesture();gestureStart=scrollY;},{passive:true});
+  function finishTouch(e){const end=e.changedTouches[0];if(touchOrigin&&end&&Math.hypot(end.clientX-touchOrigin.clientX,end.clientY-touchOrigin.clientY)>12)ignoreTapUntil=performance.now()+450;touchOrigin=null;touching=!!e.touches.length;queueSettle();}
+  addEventListener('touchend',finishTouch,{passive:true});
+  addEventListener('touchcancel',finishTouch,{passive:true});
+  addEventListener('scroll',()=>{
+    const y=scrollY;
+    // Scrollbars and embedded browser panning can scroll without wheel/pointer events.
+    if(!navigating&&Math.abs(y-lastScrollY)>.5){gestureStart??=lastScrollY;isScrolling=true;queueSettle();}
+    lastScrollY=y;requestUpdate();
+  },{passive:true});
+  addEventListener('scrollend',settleGesture,{passive:true});
+  sceneButton.addEventListener('click',nextScene);
+  advance.addEventListener('click',nextScene);
+  stage.addEventListener('click',e=>{
+    if(performance.now()<ignoreTapUntil||e.target.closest('button,a,input,select,textarea,video,canvas,[role="slider"]'))return;
+    nextScene();
+  });
+  document.querySelectorAll('a[href="#home"],a[href="#about"],a[href="#selected"],a[href="#archive"]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();scrollToPhase(a.getAttribute('href').slice(1));}));
+  document.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(e.key)&&!e.target.closest('button,a,input,textarea,select,dialog,.editor,#carousel'))beginGesture();});
   document.getElementById('field-select').addEventListener('change',e=>{
     const field=e.target.value;
-    if(field==='name'||field==='bio')scrollToPhase('about');
-    else if(field.startsWith('hero')||field==='eyebrow')scrollToPhase('about');
-    else if(field.startsWith('selected'))scrollToPhase('selected');
-    else if(field.startsWith('contact')||field==='footerName')scrollToPhase('archive');
+    scrollToPhase(field.startsWith('selected')?'selected':field.startsWith('contact')||field==='footerName'?'archive':'about');
   });
-  addEventListener('scroll',requestUpdate,{passive:true});
-  addEventListener('resize',()=>{requestUpdate();lens?.resize();},{passive:true});
-  addEventListener('orientationchange',requestUpdate,{passive:true});
-  addEventListener('pageshow',requestUpdate);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)requestUpdate();});
-  updateJourney();
-  if(['#selected','#about','#archive'].includes(location.hash))requestAnimationFrame(()=>scrollToPhase(location.hash.slice(1),'auto'));
+  let resizeTimer;
+  function refreshSize(){
+    const index=MotionJourney.nearest(geometry.points,scrollY);
+    const aligned=!navigating&&gestureStart===null&&Math.abs(geometry.points[index]-scrollY)<4;
+    measure();if(aligned)scrollToPhase(MotionJourney.names[index],'auto');else requestUpdate();lens?.resize();
+  }
+  function queueResize(){clearTimeout(resizeTimer);resizeTimer=setTimeout(refreshSize,140);}
+  addEventListener('resize',queueResize,{passive:true});
+  addEventListener('orientationchange',queueResize,{passive:true});
+  addEventListener('pageshow',()=>{measure();requestUpdate();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){measure();requestUpdate();}});
+  measure();updateJourney();
+  if(MotionJourney.names.includes(location.hash.slice(1)))requestAnimationFrame(()=>scrollToPhase(location.hash.slice(1),'auto'));
 
   // Keep every poster rigid: gently shrink whole cells, with a subtle RGB fringe.
   // The DOM wall remains the keyboard-accessible and WebGL-unavailable fallback.
   function initLens(workList){
     if(lens)return;
     const canvas=document.getElementById('archive-lens');
-    const gl=canvas.getContext('webgl',{alpha:false,antialias:false,powerPreference:'low-power',preserveDrawingBuffer:true});
+    const gl=canvas.getContext('webgl',{alpha:false,antialias:false,powerPreference:'low-power'});
     if(!gl)return;
     const vertex=`attribute vec2 a_position; varying vec2 v_uv; void main(){v_uv=a_position*.5+.5;gl_Position=vec4(a_position,0.,1.);}`;
     const fragment=`precision mediump float;
@@ -141,14 +209,16 @@
       ready=true;canvas.classList.add('is-ready');archive.classList.add('lens-ready');requestDraw();
     }
     function resize(){
-      const rect=archive.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,innerWidth<1100?1.3:1.5);
-      canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ratio=rect.width/rect.height;
+      const rect=archive.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,innerWidth<600?1:innerWidth<1100?1.25:1.5);
+      const width=Math.round(rect.width*dpr),height=Math.round(rect.height*dpr);
+      if(canvas.width===width&&canvas.height===height)return;
+      canvas.width=width;canvas.height=height;ratio=rect.width/rect.height;
       zoom=MotionLayout.archiveMetrics(rect.width,rect.height).zoom;strength=.05;
       gl.viewport(0,0,canvas.width,canvas.height);requestDraw();
     }
     function render(time){
       renderFrame=0;
-      if(!ready||contextLost||!lens.visible||document.hidden){lastTime=0;return;}
+      if(!ready||contextLost||!lens.visible||document.hidden||isScrolling||navigating){lastTime=0;return;}
       const elapsed=lastTime?Math.min((time-lastTime)/1000,.1):0;lastTime=time;
       const paused=down||document.getElementById('player-dialog').open||!document.getElementById('editor').hidden||archive.querySelector('.archive-wall:focus-within');
       if(!reduced&&!paused){

@@ -101,3 +101,22 @@ body:has(#editor:not([hidden])) .hero [data-copy]{pointer-events:auto;cursor:tex
 .site-header nav{position:absolute;left:50%;transform:translateX(-50%)}
 .player-feedback{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;font-size:12px;min-height:20px}.player-feedback button{padding:9px 16px;border-radius:20px;background:#e3d4eb;color:#382e40}.player-help a{text-decoration:underline;text-underline-offset:3px}
 @media(max-width:600px){.site-header nav{display:none}.player-feedback{font-size:11px}.player-help{line-height:1.8}}
+
+/* Native vertical scrolling with explicit, touch-sized scene navigation. */
+:root{scroll-behavior:auto!important}
+.journey,.journey-sticky{touch-action:pan-y pinch-zoom}
+.journey-sticky{min-height:0}
+.dream-portal,.dream-cloudscape{filter:none;will-change:transform,opacity}
+.dream-cloudscape:after{content:'';position:absolute;inset:0;background-image:inherit;background-size:cover;background-position:inherit;filter:blur(9px);opacity:var(--cloud-soft-alpha,0);pointer-events:none;will-change:opacity}
+.selected-section .work-card{backdrop-filter:none;-webkit-backdrop-filter:none}
+.hero-copy,.selected-section .section-top{pointer-events:auto}
+.scene-next{position:fixed;z-index:35;right:max(22px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));display:flex;align-items:center;gap:15px;min-width:114px;min-height:46px;padding:10px 15px 10px 19px;border:1px solid #e8d7f05c;border-radius:100px;background:#21172ee8;color:#f3e9f8;box-shadow:0 6px 25px #0b041f40;font-size:11px;letter-spacing:.5px;touch-action:manipulation}
+.scene-next:hover{background:#493854}.scene-next:focus-visible{outline:2px solid #e7c8f7;outline-offset:4px}
+#scene-next-icon{display:grid;place-items:center;border:1px solid #efdcf14a;border-radius:50%;width:25px;height:25px;font-size:16px}
+.scene-next.is-return{background:#eaddf2;color:#35223f;border-color:#eaddf2}.scene-next.is-return #scene-next-icon{border-color:#35223f40}
+.archive-section footer>a:last-child{display:none}
+@media(max-width:600px){.dream-cloudscape:after{filter:blur(6px)}.scene-next{right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));min-width:108px;font-size:10px}.selected-section .carousel-footer{padding-right:104px}.hero-coordinate{visibility:hidden}.archive-section footer{padding-right:128px}}
+@media(prefers-reduced-motion:reduce){.dream-cloudscape:after{filter:none}}
+
+/* Match the visible screen as mobile browser chrome expands or collapses. */
+.journey-sticky{height:100vh;height:100dvh;min-height:0}.archive-section{height:100vh;height:100dvh}
