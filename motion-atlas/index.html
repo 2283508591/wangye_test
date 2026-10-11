@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#131918"><meta name="description" content="小葫芦的动态作品集：三维动画、AI 影像与那些正在发生的灵感。">
+  <title>小葫芦 · Motion Atlas</title>
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="refinements.css"><link rel="stylesheet" href="immersive.css"><link rel="preload" as="image" href="https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/dream-portal-v5.webp" media="(min-width:1101px), (orientation:landscape)"><link rel="preload" as="image" href="https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/dream-portal-mobile-v5.webp" media="(max-width:1100px) and (orientation:portrait)"><script defer src="layout.js"></script><script defer src="app.js"></script><script defer src="immersive.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="#home" aria-label="回到首页"><span class="brand-icon">✳</span><span data-copy="brand">小葫芦</span><span class="wordmark-slash">/</span><span class="brand-caption">MOTION ATLAS</span></a>
+    <nav aria-label="主导航"><a href="#about" class="nav-link active">关于</a><a href="#selected" class="nav-link">精选作品 <sup>19</sup></a><a href="#archive" class="nav-link">全部作品</a></nav>
+    <button class="edit-trigger" id="open-editor" aria-label="打开文案与样式编辑器"><span>✎</span><span>编辑文案</span></button>
+  </header>
+  <main>
+    <div class="journey" id="journey"><div class="journey-sticky">
+      <div class="shared-dream" aria-hidden="true"><div class="dream-cloudscape"></div><div class="dream-portal"></div><div class="dream-atmosphere"></div><div class="dream-shade"></div></div>
+    <button id="journey-advance" class="journey-advance" aria-label="进入个人信息"><span class="advance-hint"><i>↓</i> 点击或下滑，进入梦境</span></button>
+    <section id="home" class="home-section" aria-label="开场与个人介绍">
+      <div class="hero">
+        <div class="hero-eyebrow"><span class="status-dot"></span><span data-copy="eyebrow">A LITTLE IMAGINATION, ALWAYS IN MOTION.</span></div>
+        <div class="hero-copy"><p class="section-kicker"><span data-copy="name">小葫芦</span> / 3D & AI ARTIST</p><h1><span data-copy="heroLine1">让想象</span><br><span class="outline-word" data-copy="heroLine2">开始流动。</span><span class="hero-asterisk">✳</span></h1><p class="hero-description" data-copy="heroDescription">三维动画与 AI 影像创作者。</p><p class="hero-profile" data-copy="bio">我用光影、质感与天马行空的想象，
+把每一个灵感，变成会呼吸的画面。</p></div>
+        <div class="intro-reels" aria-label="作品预览">
+          <button class="intro-reel" data-work-index="3" aria-label="预览作品一"><img id="hero-poster-one" alt=""><span><i>▶</i> VIEW FILM</span></button>
+          <button class="intro-reel intro-reel-stat" data-work-index="1" aria-label="预览作品二"><img id="hero-poster-two" alt=""><span><b>19</b> MOTION STORIES</span></button>
+          <button class="intro-reel" data-work-index="14" aria-label="预览作品三"><img id="hero-poster-three" alt=""><span><i>▶</i> VIEW FILM</span></button>
+        </div>
+        <div class="hero-bottom"><a href="#selected" class="scroll-link"><span class="circle-arrow">↓</span><span>进入作品<span class="tiny-label">CONTINUE THE JOURNEY</span></span></a><span class="hero-edition">SELECTED MOTION WORKS<br>PORTFOLIO — VOL. 01</span><span class="hero-coordinate">想象没有边界<br>KEEP WANDERING ↗</span></div>
+      </div>
+
+    </section>
+    <section id="selected" class="selected-section" aria-label="层叠精选作品" inert>
+      <div class="section-top"><div><span class="section-number">02 / SELECTED WORKS</span><h2 data-copy="selectedTitle">每一帧，都有想象。</h2></div><p data-copy="selectedDescription">左右滑动，让灵感在指尖切换。<br>停留片刻，故事自动开始。</p></div>
+      <div class="filters" id="selected-filters" aria-label="筛选精选作品"><button class="active" data-category="全部">全部 <span>19</span></button><button data-category="三维动画">三维动画 <span>14</span></button><button data-category="AI 视频">AI 视频 <span>05</span></button></div>
+      <div class="carousel-scene" id="carousel" tabindex="0" role="region" aria-roledescription="轮播图" aria-label="左右拖动、使用方向键或点击卡片切换作品"><div class="carousel-glow"></div><div class="card-track" id="card-track"></div></div>
+      <div class="carousel-toolbar"><button class="arrow-button" id="previous" aria-label="上一个作品">←</button><div class="current-caption"><span class="playing-dot"></span><div><span id="current-title"></span><span class="tiny-label" id="current-category"></span></div></div><span id="current-index" class="index-counter"></span><button class="arrow-button" id="next" aria-label="下一个作品">→</button></div>
+      <div class="carousel-footer"><span>DRAG TO EXPLORE</span><div class="progress-track"><span id="carousel-progress"></span></div><button id="open-current">完整播放 <span>↗</span></button></div>
+    </section>
+      <div class="journey-rail" aria-hidden="true"><span class="journey-phase">01 / INTO THE DREAM</span><span class="journey-line"><i></i></span><span>SCROLL TO WANDER ↓</span></div>
+    </div></div>
+    <section id="archive" class="archive-section" aria-label="全部作品与联系信息">
+      <div class="archive-top"><span class="section-number">03 / THE MOTION ARCHIVE</span><div class="archive-filters" id="archive-filters"><button class="active" data-category="全部">全部</button><button data-category="三维动画">三维动画</button><button data-category="AI 视频">AI 视频</button></div><span id="archive-count">19 FILMS / ENDLESS IDEAS</span></div>
+      <span class="lens-help">左右拖动探索 · 点击作品播放</span>
+    <canvas id="archive-lens" aria-hidden="true"></canvas><div id="archive-wall" class="archive-wall" aria-label="使用 Tab 键选择作品，Enter 播放"></div><div class="archive-vignette"></div><span class="lens-caption" id="lens-caption" aria-hidden="true"></span>
+      <div class="contact-center"><div class="contact-eyebrow"><span class="status-dot"></span><span data-copy="contactEyebrow">让下一个好想法，在这里发生</span></div><h2><span data-copy="contactLine1">下一帧，</span><br><span data-copy="contactLine2">一起创造。</span></h2><p data-copy="contactDescription">关于创作、合作，或一个有趣的灵感。<br>很高兴与你聊聊。</p><button class="contact-button" id="contact-button"><span data-copy="contactButton">与小葫芦聊聊</span><span>↗</span></button><span class="contact-hint" id="contact-hint">联系方式待填写 · 可在编辑面板设置</span></div>
+      <footer><a href="#home"><span data-copy="footerName">小葫芦</span> © <span id="year">2026</span></a><span>MADE OF CURIOSITY & A LITTLE MOTION.</span><a href="#home">回到顶部 ↑</a></footer>
+    </section>
+  </main>
+  <aside class="editor" id="editor" aria-label="文案与样式编辑器" hidden><div class="editor-header"><div><span class="section-kicker">MAKE IT YOURS</span><h2>文字与样式</h2></div><button id="close-editor" class="icon-button" aria-label="关闭编辑器">×</button></div><p class="editor-note">选择文案后调整，下方页面即时更新。</p><label>选择要编辑的内容<select id="field-select"></select></label><label>文案内容<textarea id="copy-input" rows="3"></textarea></label><div class="editor-row"><label>字体<select id="font-input"><option value="inherit">跟随网页</option><option value="'Microsoft YaHei',sans-serif">微软雅黑</option><option value="'SimSun',serif">宋体</option><option value="'KaiTi',serif">楷体</option><option value="Arial,sans-serif">Arial</option><option value="Georgia,serif">Georgia</option><option value="'Courier New',monospace">等宽字体</option></select></label><label class="color-label">文字颜色<input id="color-input" type="color" value="#ffffff"></label></div><div class="editor-row"><label>字号（px）<input id="size-input" type="number" min="10" max="180" placeholder="跟随网页"></label><label>字重<select id="weight-input"><option value="inherit">跟随网页</option><option value="300">细体</option><option value="400">常规</option><option value="500">中等</option><option value="600">半粗</option><option value="700">粗体</option></select></label></div><label>对齐方式<div class="alignment-controls"><button data-align="left">左对齐</button><button data-align="center">居中</button><button data-align="right">右对齐</button></div></label><label>联系邮箱或链接<input id="contact-input" type="text" placeholder="邮箱、https://链接 或 微信号"></label><div class="editor-actions"><button id="save-config" class="primary-editor-button">保存到此浏览器</button><div><button id="export-config">导出配置</button><button id="import-config">导入配置</button><button id="reset-field">重置当前项</button></div></div><input type="file" id="config-file" accept="application/json" hidden><p class="editor-status" id="editor-status" role="status">修改保存在当前浏览器；导出可保留备份。</p></aside>
+  <dialog id="player-dialog"><div class="player-heading"><div><span id="player-category" class="section-kicker"></span><h2 id="player-title"></h2></div><button id="close-player" class="icon-button" aria-label="关闭视频">×</button></div><video id="full-video" controls playsinline preload="none"></video><p class="player-help">按 Esc 关闭 · 播放器内可打开声音与全屏</p></dialog>
+  <div class="toast" id="toast" role="status"></div>
+</body></html>
