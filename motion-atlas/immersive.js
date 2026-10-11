@@ -66,7 +66,7 @@
     journey.classList.toggle('is-gathering',p<.91);
     hero.inert=heroOpacity<.4;selected.inert=p<.89||bottom<g.stage*.25;
     advance.disabled=p>=.89||bottom<g.stage*.5;
-    const advanceLabel=p<.16?'���������Ϣ':'���뾫ѡ��Ʒ';
+    const advanceLabel=p<.16?'进入个人信息':'进入精选作品';
     if(advanceLabel!==lastAdvance){lastAdvance=advanceLabel;advance.setAttribute('aria-label',advanceLabel);}
     const phaseText=p<.49?'01 / INTO THE DREAM':'02 / SELECTED MOTION';
     if(phaseLabel.textContent!==phaseText)phaseLabel.textContent=phaseText;
@@ -78,9 +78,9 @@
     const destination=MotionJourney.next(p,archiveTop<g.view*.5);
     if(destination!==lastDestination){
       lastDestination=destination;sceneButton.dataset.destination=destination;
-      sceneButton.setAttribute('aria-label',({about:'���������Ϣ',selected:'���뾫ѡ��Ʒ',archive:'����ȫ����Ʒ',home:'���ض���'})[destination]);
-      sceneLabel.textContent=({about:'������Ϣ',selected:'������Ʒ',archive:'��һҳ',home:'���ض���'})[destination];
-      sceneIcon.textContent=destination==='home'?'��':'��';
+      sceneButton.setAttribute('aria-label',({about:'进入个人信息',selected:'进入精选作品',archive:'进入全部作品',home:'返回顶部'})[destination]);
+      sceneLabel.textContent=({about:'个人信息',selected:'进入作品',archive:'下一页',home:'返回顶部'})[destination];
+      sceneIcon.textContent=destination==='home'?'↑':'↓';
       sceneButton.classList.toggle('is-return',destination==='home');
     }
     if(lens){lens.entry=entry;lens.visible=archiveTop<g.view&&archiveTop+g.archiveHeight>0;lens.request();}
@@ -252,7 +252,7 @@
     const ctx=atlas.getContext('2d');const cols=6,rows=4,cw=atlas.width/cols,ch=atlas.height/rows;
     const atlasWorks=[...workList,...[8,13,6,16,11].map(i=>workList[i]).filter(Boolean)];
     const images=atlasWorks.map(w=>{const im=new Image();im.src=MotionMedia.poster(w);return im;});
-    let category='ȫ��',renderFrame=0,ready=false,shiftX=0,shiftY=0,targetX=0,targetY=0,panX=0,ratio=1,zoom=[1,1],strength=.10,contextLost=false;
+    let category='全部',renderFrame=0,ready=false,shiftX=0,shiftY=0,targetX=0,targetY=0,panX=0,ratio=1,zoom=[1,1],strength=.10,contextLost=false;
     // Texture-space drift is separate from the user's drag and pointer parallax.
     // Negative texture movement makes the visible wall travel gently to the right.
     const driftPixelsPerSecond=6;
@@ -265,7 +265,7 @@
         const image=images[i],x=(i%cols)*cw+8*unit,y=Math.floor(i/cols)*ch+8*unit,width=cw-16*unit,height=ch-16*unit;
         ctx.save();roundedRect(x,y,width,height,20);ctx.clip();ctx.fillStyle='#29232f';ctx.fillRect(x,y,width,height);
         if(image.complete&&image.naturalWidth){const cover=Math.max(width/image.naturalWidth,height/image.naturalHeight),sw=width/cover,sh=height/cover;ctx.drawImage(image,(image.naturalWidth-sw)/2,(image.naturalHeight-sh)/2,sw,sh,x,y,width,height);}
-        if(category!=='ȫ��'&&w.category!==category){ctx.fillStyle='#100a17e8';ctx.fillRect(x,y,width,height);}
+        if(category!=='全部'&&w.category!==category){ctx.fillStyle='#100a17e8';ctx.fillRect(x,y,width,height);}
         else{const shade=ctx.createLinearGradient(0,y,0,y+height);shade.addColorStop(0,'#11091a00');shade.addColorStop(.7,'#11091a08');shade.addColorStop(1,'#11091a70');ctx.fillStyle=shade;ctx.fillRect(x,y,width,height);}
         ctx.restore();ctx.strokeStyle='#dfb8f029';ctx.lineWidth=2;roundedRect(x,y,width,height,20);ctx.stroke();
       });
@@ -302,7 +302,7 @@
     function hitAt(event){
       const rect=canvas.getBoundingClientRect();
       const index=MotionLayout.archiveHit((event.clientX-rect.left)/rect.width,(event.clientY-rect.top)/rect.height,{ratio,zoom},[shiftX+driftX,shiftY],.96+.04*lens.entry,strength);
-      const w=index===null?null:atlasWorks[index];return w&&(category==='ȫ��'||w.category===category)?w:null;
+      const w=index===null?null:atlasWorks[index];return w&&(category==='全部'||w.category===category)?w:null;
     }
     const caption=document.getElementById('lens-caption');let down=null;
     canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;down={x:e.clientX,y:e.clientY,pan:panX,dragging:false};});
@@ -312,7 +312,7 @@
       const rect=canvas.getBoundingClientRect();
       if(down){const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy))down.dragging=true;if(down.dragging){if(!canvas.hasPointerCapture(e.pointerId))canvas.setPointerCapture(e.pointerId);targetX=down.pan-dx/rect.width*.6;caption.classList.remove('visible');canvas.style.cursor='grabbing';requestDraw();return;}}
       if(!reduced&&e.pointerType==='mouse'){targetX=panX+((e.clientX-rect.left)/rect.width-.5)*.025;targetY=-((e.clientY-rect.top)/rect.height-.5)*.014;requestDraw();}
-      const w=hitAt(e);if(w&&e.pointerType==='mouse'){caption.textContent=w.title+' / '+w.category+' �J';caption.style.left=Math.min(rect.width-230,Math.max(15,e.clientX-rect.left+18))+'px';caption.style.top=Math.max(15,e.clientY-rect.top-42)+'px';caption.classList.add('visible');canvas.style.cursor='pointer';}else{caption.classList.remove('visible');canvas.style.cursor='grab';}
+      const w=hitAt(e);if(w&&e.pointerType==='mouse'){caption.textContent=w.title+' / '+w.category+' ↗';caption.style.left=Math.min(rect.width-230,Math.max(15,e.clientX-rect.left+18))+'px';caption.style.top=Math.max(15,e.clientY-rect.top-42)+'px';caption.classList.add('visible');canvas.style.cursor='pointer';}else{caption.classList.remove('visible');canvas.style.cursor='grab';}
     });
     canvas.addEventListener('pointerleave',()=>{caption.classList.remove('visible');if(!down){targetX=panX;targetY=0;}requestDraw();});
     canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();contextLost=true;canvas.classList.remove('is-ready');archive.classList.remove('lens-ready');});
@@ -320,7 +320,7 @@
     Promise.all(images.map(image=>image.decode().catch(()=>{}))).then(()=>{uploadAtlas();requestUpdate();});
   }
   let archivePrepared=!MotionMedia.compact,introPrepared=!MotionMedia.compact,workData=[];
-  function prepareIntro(){document.querySelectorAll('.intro-reel').forEach(b=>{const w=workData[+b.dataset.workIndex];if(!w)return;const image=b.querySelector('img');image.decoding='async';image.src=MotionMedia.poster(w);b.setAttribute('aria-label','Ԥ����Ʒ '+w.title);if(!b.dataset.bound){b.dataset.bound='true';b.addEventListener('click',()=>openPlayer(w));}});}
+  function prepareIntro(){document.querySelectorAll('.intro-reel').forEach(b=>{const w=workData[+b.dataset.workIndex];if(!w)return;const image=b.querySelector('img');image.decoding='async';image.src=MotionMedia.poster(w);b.setAttribute('aria-label','预览作品 '+w.title);if(!b.dataset.bound){b.dataset.bound='true';b.addEventListener('click',()=>openPlayer(w));}});}
   MotionMedia.on('intro',()=>{introPrepared=true;prepareIntro();});
   MotionMedia.on('archive',()=>{archivePrepared=true;if(workData.length)initLens(workData);});
   document.addEventListener('motionworksready',e=>{workData=e.detail;if(archivePrepared)initLens(workData);if(introPrepared)prepareIntro();});
