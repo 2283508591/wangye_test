@@ -18,6 +18,7 @@ const MotionJourney=(()=>{
     return names[to];
   }
   function next(progress,archiveVisible){return archiveVisible?'home':progress<.16?'about':progress<.89?'selected':'archive';}
+  function previous(progress,archiveVisible){return archiveVisible?'selected':progress<.16?null:progress<.89?'home':'about';}
   // Exact critically damped response: retain momentum when input changes,
   // and use elapsed seconds so 60 Hz and 120 Hz displays behave alike.
   function damp(state,target,seconds,smoothTime=.18){
@@ -27,6 +28,6 @@ const MotionJourney=(()=>{
   }
   function ease(t){t=Math.max(0,Math.min(1,t));return t*t*t*(t*(t*6-15)+10);}
   function wheelPixels(delta,mode,view){return delta*(mode===1?16:mode===2?view:1);}
-  return {names,stops,nearest,settle,next,damp,ease,wheelPixels};
+  return {names,stops,nearest,settle,next,previous,damp,ease,wheelPixels};
 })();
 if(typeof module==='object'&&module.exports)module.exports=MotionJourney;
