@@ -1,7 +1,7 @@
 /* Personal details and optical glass, kept compact on phones. */
-.profile-identity{display:flex;align-items:center;gap:10px;margin:0 0 18px;color:#f6eff7;font-size:15px;letter-spacing:.8px}
-.profile-identity .profile-age{font-size:10px;letter-spacing:1px;color:#ece6efba;padding-left:10px;border-left:1px solid #ffffff35}
-.hero-copy{top:25%}.hero-description{white-space:pre-line}
+.profile-identity{display:flex;align-items:center;gap:14px;margin:0 0 20px;color:#fff9ff;font-size:clamp(20px,1.2vw,24px);font-weight:500;line-height:1.5;letter-spacing:1px;text-shadow:0 1px 3px #080613b3,0 3px 16px #08061380}
+.profile-identity .profile-age{font-size:15px;font-weight:400;letter-spacing:.5px;color:#f5eef5e6;padding-left:14px;border-left:1px solid #ffffff66}
+.hero-copy{top:25%}.hero-description{white-space:pre-line;font-size:clamp(14px,1vw,17px);line-height:1.85;color:#faf3fa;text-shadow:0 1px 3px #080613a6,0 3px 16px #08061366}
 .scene-previous{right:auto;left:max(22px,env(safe-area-inset-left));padding:7px 16px 7px 12px}
 .scene-previous[hidden]{display:none!important}
 .scene-previous .previous-icon{display:grid;place-items:center;border:1px solid var(--glass-line);border-radius:50%;width:22px;height:22px;font-size:14px}
@@ -26,18 +26,19 @@ body:has(dialog[open]) .scene-next{visibility:hidden}
 #contact-dialog :focus-visible,.scene-previous:focus-visible{outline:2px solid #eaf3ff;outline-offset:3px}
 .qr-original{display:inline-block;margin-top:14px;color:#e6ebf1b8;font-size:9px;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:600px){
- .hero-copy{top:37%}.profile-identity{font-size:13px;margin-bottom:14px;gap:9px}.profile-identity .profile-age{font-size:9px}
+ .hero-copy{top:37%}.profile-identity{font-size:18px;margin-bottom:16px;gap:12px}.profile-identity .profile-age{font-size:13px;padding-left:12px}
+ .hero-description{font-size:13px;line-height:1.85;margin-top:20px}
  .scene-previous{left:max(14px,env(safe-area-inset-left));padding:7px 13px 7px 10px}
  .scene-previous .previous-icon{width:20px;height:20px;font-size:13px}
  .journey-rail{left:calc(8% + 88px);font-size:4px}
  .archive-section footer,.mobile-archive footer{left:calc(7% + 86px);padding:0 48px 0 0;right:7%;font-size:7px}
  #contact-dialog{padding:24px 22px;border-radius:25px}
 }
-@media(max-width:600px) and (max-height:740px){.hero-copy{top:31%}.profile-identity{margin-bottom:11px}}
+@media(max-width:600px) and (max-height:740px){.hero-copy{top:31%}.profile-identity{margin-bottom:12px}.hero-description{margin-top:14px}}
 @media(min-width:601px) and (max-width:1100px) and (orientation:portrait){.hero-copy{top:36%}}
 @media(max-height:620px){
  #contact-dialog{padding:18px 22px}.contact-monogram{width:33px;height:33px;font-size:24px;margin-bottom:7px}
  #contact-dialog h2{font-size:20px}.contact-role{margin-bottom:12px}.wechat-qr{width:150px}
  #contact-status{margin-bottom:9px}.contact-number{font-size:18px}.contact-number-caption{margin-bottom:12px}.qr-original{margin-top:10px}
 }
-@media(min-width:601px) and (max-height:500px){.hero-copy{top:22%}.profile-identity{font-size:11px;margin-bottom:8px}}
+@media(min-width:601px) and (max-height:500px){.hero-copy{top:22%}.profile-identity{font-size:17px;margin-bottom:8px}.profile-identity .profile-age{font-size:13px}.hero-description{font-size:12px;margin-top:12px}}
