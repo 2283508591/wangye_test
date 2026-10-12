@@ -9,6 +9,7 @@
   const sceneButton=document.getElementById('scene-next');
   const sceneLabel=document.getElementById('scene-next-label');
   const sceneIcon=document.getElementById('scene-next-icon');
+  const previousButton=document.getElementById('scene-previous');
   const phaseLabel=document.querySelector('.journey-phase');
   const navLinks=[...document.querySelectorAll('.nav-link')];
   const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -82,6 +83,9 @@
       sceneLabel.textContent=({about:'个人信息',selected:'进入作品',archive:'下一页',home:'返回顶部'})[destination];
       sceneIcon.textContent=destination==='home'?'↑':'↓';
       sceneButton.classList.toggle('is-return',destination==='home');
+      const previous=MotionJourney.previous(p,archiveTop<g.view*.5);
+      previousButton.hidden=!previous;
+      previousButton.dataset.destination=previous||'';
     }
     if(lens){lens.entry=entry;lens.visible=archiveTop<g.view&&archiveTop+g.archiveHeight>0;lens.request();}
     const phase=archiveTop<g.view*.5?'archive':p<.12?'entrance':p<.49?'about':p<.89?'gather':'films';
@@ -112,7 +116,7 @@
     }
     navigationFrame=requestAnimationFrame(step);
   }
-  function nextScene(){if(document.getElementById('player-dialog').open||!document.getElementById('editor').hidden)return;scrollToPhase(lastDestination||'about');}
+  function nextScene(){if(document.querySelector('dialog[open]')||!document.getElementById('editor').hidden)return;scrollToPhase(lastDestination||'about');}
   function settleGesture(){
     clearTimeout(settleTimer);
     if(navigating||wheelFrame||touching||gestureStart===null)return;
@@ -177,6 +181,7 @@
   // Wait for both native inertia and the last input burst before aligning a scene.
   addEventListener('scrollend',queueSettle,{passive:true});
   sceneButton.addEventListener('click',nextScene);
+  previousButton.addEventListener('click',()=>{if(!document.querySelector('dialog[open]'))scrollToPhase(previousButton.dataset.destination);});
   advance.addEventListener('click',nextScene);
   stage.addEventListener('click',e=>{
     if(performance.now()<ignoreTapUntil||e.target.closest('button,a,input,select,textarea,video,canvas,[role="slider"]'))return;
@@ -286,7 +291,7 @@
       renderFrame=0;
       if(!ready||contextLost||!lens.visible||document.hidden||isScrolling||navigating){lastTime=0;return;}
       const elapsed=lastTime?Math.min((time-lastTime)/1000,.1):0;lastTime=time;
-      const paused=down||document.getElementById('player-dialog').open||!document.getElementById('editor').hidden||archive.querySelector('.archive-wall:focus-within');
+      const paused=down||document.querySelector('dialog[open]')||!document.getElementById('editor').hidden||archive.querySelector('.archive-wall:focus-within');
       if(!reduced&&!paused){
         const width=canvas.clientWidth||1,z=.96+.04*lens.entry;
         driftX=(driftX-driftPixelsPerSecond*elapsed/width*zoom[0]*z)%1;

@@ -7,7 +7,7 @@
   let workList=[],built=false,visible=false,prepared=false;
   const groups=[[13,3,2,7,11,5],[6,14,5,1,10,8],[13,10,15,16,12,17],[14,5,6,18,4,8]];
   function updatePlayback(){
-    const paused=!visible||document.hidden||reduced.matches||document.getElementById('player-dialog').open||!document.getElementById('editor').hidden;
+    const paused=!visible||document.hidden||reduced.matches||!!document.querySelector('dialog[open]')||!document.getElementById('editor').hidden;
     archive.classList.toggle('archive-drift-paused',paused);
   }
   function sync(){
@@ -56,6 +56,7 @@
   }
   const observer=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;updatePlayback();},{threshold:0});observer.observe(archive);
   new MutationObserver(updatePlayback).observe(document.getElementById('player-dialog'),{attributes:true,attributeFilter:['open']});
+  new MutationObserver(updatePlayback).observe(document.getElementById('contact-dialog'),{attributes:true,attributeFilter:['open']});
   new MutationObserver(updatePlayback).observe(document.getElementById('editor'),{attributes:true,attributeFilter:['hidden']});
   document.addEventListener('visibilitychange',updatePlayback);
   media.addEventListener('change',sync);reduced.addEventListener('change',updatePlayback);

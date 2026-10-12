@@ -40,13 +40,6 @@ applyConfig();
 $('#year').textContent=new Date().getFullYear();
 let toastTimer;
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2800);}
-$('#contact-button').addEventListener('click',async()=>{
-  const value=config.contact.trim();
-  if(!value) {toast('联系方式即将更新，感谢关注');return;}
-  if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) location.href='mailto:'+value;
-  else if(/^https?:\/\//i.test(value)) window.open(value,'_blank','noopener,noreferrer');
-  else {try {await navigator.clipboard.writeText(value);toast('联系方式已复制：'+value);} catch {toast('联系方式：'+value);}}
-});
 const menuToggle=$('#menu-toggle');
 function closeMenu(){menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','打开导航');$('.site-header').classList.remove('menu-open');}
 menuToggle.addEventListener('click',()=>{const open=menuToggle.getAttribute('aria-expanded')!=='true';menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'关闭导航':'打开导航');$('.site-header').classList.toggle('menu-open',open);});
@@ -201,4 +194,4 @@ document.addEventListener('WeixinJSBridgeReady',()=>playActive());
 function closePlayer(){if($('#player-dialog').open)$('#player-dialog').close();}
 $('#close-player').addEventListener('click',closePlayer);$('#player-dialog').addEventListener('click',e=>{if(e.target===$('#player-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePlayer();}});
 $('#player-dialog').addEventListener('close',()=>{clearTimeout(playerTimer);playerWork=null;const v=$('#full-video');v.pause();v.removeAttribute('src');v.load();previousFocus?.focus({preventScroll:true});playActive();});
-fetch('works.json?v=12').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(data=>{works=data;filtered=works;buildCards();buildArchive();document.dispatchEvent(new CustomEvent('motionworksready',{detail:works}));}).catch(()=>{toast('作品列表未能加载，请刷新页面');$('#current-title').textContent='作品加载失败';});
+fetch('works.json?v=13').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(data=>{works=data;filtered=works;buildCards();buildArchive();document.dispatchEvent(new CustomEvent('motionworksready',{detail:works}));}).catch(()=>{toast('作品列表未能加载，请刷新页面');$('#current-title').textContent='作品加载失败';});
