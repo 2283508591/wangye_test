@@ -51,6 +51,7 @@
     // Scope changing variables to the pinned scene, and never read layout after writes.
     setScene('--portal-scale',(reduced?1:1+smooth(.02,.29,p)*.17+push*4.2).toFixed(3));
     setScene('--portal-alpha',(1-smooth(.66,.84,p)).toFixed(3));
+    setScene('--still-alpha',(1-smooth(.34,.52,p)).toFixed(3));
     setScene('--cloud-scale',(reduced?1:1.1+push*.12).toFixed(3));
     setScene('--cloud-soft-alpha',smooth(.71,.91,p).toFixed(3));
     setScene('--scene-dim',(.14+settled*.29).toFixed(3));
