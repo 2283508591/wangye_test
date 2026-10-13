@@ -76,6 +76,14 @@ $$('[data-copy]').forEach(el=>el.addEventListener('click',e=>{if(!$('#editor').h
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#editor').hidden)closeEditor();});
 
 let works=[],filtered=[],carouselWorks=[],active=0,cards=[],carouselVisible=false,playTimer,wheelLock=false;
+const playbackTrace=[];
+let previewNeedsGesture=false;
+const playbackDiagnostic=MotionMedia.compact&&new URLSearchParams(location.search).has('qa')?document.createElement('output'):null;
+if(playbackDiagnostic){playbackDiagnostic.id='playback-diagnostics';playbackDiagnostic.hidden=true;document.body.append(playbackDiagnostic);}
+const mobilePreview=MotionMedia.compact?MotionPlayback.createPreview({slow:MotionMedia.slow,
+  onState(entry,state){entry.card.classList.toggle('playing',state==='playing');if(state==='playing')previewNeedsGesture=false;if(state==='blocked'){previewNeedsGesture=true;$('.card-meta span',entry.card).textContent='点击播放';}},
+  onTrace(event,entry){if(!playbackDiagnostic)return;playbackTrace.push({event,src:entry.src,time:Math.round(performance.now())});if(playbackTrace.length>30)playbackTrace.shift();playbackDiagnostic.textContent=JSON.stringify({state:mobilePreview.snapshot(),events:playbackTrace});}
+}):null;
 const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let selectedReady=!MotionMedia.compact,archiveReady=!MotionMedia.compact,archiveBuilt=false;
 function hydrateCard(card,work){const img=$('img',card);if(!img.getAttribute('src'))img.src=MotionMedia.poster(work);const video=$('video',card);if(!video.getAttribute('poster'))video.poster=MotionMedia.poster(work);}
@@ -99,10 +107,11 @@ const timeLabel=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 function prepareInlineVideo(video,preview=false){
   video.playsInline=true;video.setAttribute('playsinline','');video.setAttribute('webkit-playsinline','');
   video.setAttribute('x5-playsinline','');
-  if(preview){video.muted=true;video.defaultMuted=true;video.setAttribute('muted','');video.autoplay=true;}
+  if(preview){video.muted=true;video.defaultMuted=true;video.setAttribute('muted','');video.autoplay=!MotionMedia.compact;}
 }
 function buildCards(){
-  cards.forEach(c=>{const v=$('video',c);v.pause();v.removeAttribute('src');v.load();});$('#card-track').replaceChildren();cards=[];
+  mobilePreview?.setItems([]);
+  cards.forEach(c=>{const v=$('video',c);v.pause();if(!mobilePreview||v.getAttribute('src')){v.removeAttribute('src');v.load();}});$('#card-track').replaceChildren();cards=[];
   if(!filtered.length){carouselWorks=[];return;}
   carouselWorks=Array.from({length:Math.max(1,Math.ceil(15/filtered.length))},()=>filtered).flat();
   carouselWorks.forEach((work,i)=>{
@@ -111,30 +120,32 @@ function buildCards(){
     $('img',card).decoding='async';if(!MotionMedia.compact)hydrateCard(card,work);$('video',card).muted=true;$('.card-type',card).textContent=work.category;$('.card-index',card).textContent=`SELECTED / ${String(i%filtered.length+1).padStart(2,'0')}`;$('h3',card).textContent=work.title;$('p',card).textContent=workDescriptions[work.id]||'以光影与质感，探索新的表达。';$('.card-meta span',card).textContent=mediaLabel(work);$('.card-duration',card).textContent=timeLabel(work.duration);
     prepareInlineVideo($('video',card),true);
     $('video',card).addEventListener('playing',()=>{card.classList.add('playing');$('.card-meta span',card).textContent=mediaLabel(work);});$('video',card).addEventListener('error',()=>{card.classList.remove('playing');$('.card-meta span',card).textContent='点击完整播放';});
-    card.addEventListener('click',()=>{if(dragged)return;if(active===i)openPlayer(work);else {setActive(i);playActive();}});$('#card-track').append(card);cards.push(card);
-  });setActive(Math.min(3,filtered.length-1));
+    card.addEventListener('click',()=>{if(dragged)return;if(active===i)openPlayer(work);else {setActive(i);if(!mobilePreview)playActive();}});$('#card-track').append(card);cards.push(card);
+  });
+  mobilePreview?.setItems(cards.map((card,i)=>({card,video:$('video',card),src:MotionMedia.preview(carouselWorks[i])})));
+  setActive(Math.min(3,filtered.length-1));
 }
 function setActive(index){
   if(!filtered.length)return;active=((index%carouselWorks.length)+carouselWorks.length)%carouselWorks.length;clearTimeout(playTimer);
   const step=cards[0].offsetWidth*(innerWidth<600?.54:.58);
   const radius=Math.min(8,Math.ceil(innerWidth/(2*step))+2);
-  cards.forEach((card,i)=>{let d=((i-active)%cards.length+cards.length)%cards.length;if(d>cards.length/2)d-=cards.length;const distance=Math.abs(d);card.style.setProperty('--card-x',d*step);card.style.setProperty('--card-z',-distance*45);card.style.setProperty('--card-turn',d===0?0:d>0?-26:26);card.style.setProperty('--card-scale',Math.max(.72,1-distance*.035));card.style.setProperty('--card-side',d<0?-1:1);card.style.zIndex=String(30-distance);card.style.opacity=distance>radius?'0':String(Math.max(.55,1-distance*.07));card.style.filter=distance?'brightness(.8)':'none';card.style.visibility=distance>radius?'hidden':'visible';if(MotionMedia.compact)card.style.willChange=distance<=2?'transform':'auto';card.style.pointerEvents=distance>radius?'none':'auto';card.classList.toggle('active',d===0);card.setAttribute('aria-current',d===0?'true':'false');card.tabIndex=distance>radius?-1:0;const v=$('video',card);if(d!==0){v.pause();card.classList.remove('playing');if(v.getAttribute('src')){v.removeAttribute('src');v.load();}}});
+  cards.forEach((card,i)=>{let d=((i-active)%cards.length+cards.length)%cards.length;if(d>cards.length/2)d-=cards.length;const distance=Math.abs(d);card.style.setProperty('--card-x',d*step);card.style.setProperty('--card-z',-distance*45);card.style.setProperty('--card-turn',d===0?0:d>0?-26:26);card.style.setProperty('--card-scale',Math.max(.72,1-distance*.035));card.style.setProperty('--card-side',d<0?-1:1);card.style.zIndex=String(30-distance);card.style.opacity=distance>radius?'0':String(Math.max(.55,1-distance*.07));card.style.filter=distance?'brightness(.8)':'none';card.style.visibility=distance>radius?'hidden':'visible';if(MotionMedia.compact)card.style.willChange=distance<=2?'transform':'auto';card.style.pointerEvents=distance>radius?'none':'auto';card.classList.toggle('active',d===0);card.setAttribute('aria-current',d===0?'true':'false');card.tabIndex=distance>radius?-1:0;const v=$('video',card);if(d!==0){v.pause();card.classList.remove('playing');if(!mobilePreview&&v.getAttribute('src')){v.removeAttribute('src');v.load();}}});
   hydrateVisibleCards();
-  const work=carouselWorks[active],workIndex=active%filtered.length;$('#current-title').textContent=work.title;$('#current-category').textContent=work.category==='AI 视频'?'AI FILM / VISUAL EXPLORATION':'3D ANIMATION / PRODUCT FILM';$('#current-index').textContent=`${String(workIndex+1).padStart(2,'0')} / ${String(filtered.length).padStart(2,'0')}`;$('#carousel-progress').style.width=`${(workIndex+1)/filtered.length*100}%`;$$('.carousel-position i').forEach((dot,i)=>dot.classList.toggle('active',i===Math.min(4,Math.floor(workIndex/filtered.length*5))));$('#previous').disabled=filtered.length<2;$('#next').disabled=filtered.length<2;playTimer=setTimeout(playActive,400);
+  const work=carouselWorks[active],workIndex=active%filtered.length;$('#current-title').textContent=work.title;$('#current-category').textContent=work.category==='AI 视频'?'AI FILM / VISUAL EXPLORATION':'3D ANIMATION / PRODUCT FILM';$('#current-index').textContent=`${String(workIndex+1).padStart(2,'0')} / ${String(filtered.length).padStart(2,'0')}`;$('#carousel-progress').style.width=`${(workIndex+1)/filtered.length*100}%`;$$('.carousel-position i').forEach((dot,i)=>dot.classList.toggle('active',i===Math.min(4,Math.floor(workIndex/filtered.length*5))));$('#previous').disabled=filtered.length<2;$('#next').disabled=filtered.length<2;if(mobilePreview)mobilePreview.select(active);else playTimer=setTimeout(playActive,400);
 }
-async function playActive(){if(!carouselVisible||document.hidden||$('#player-dialog').open)return;const card=cards[active];if(!card)return;const video=$('video',card);if(!video.getAttribute('src')){video.src=MotionMedia.preview(carouselWorks[active]);video.load();}video.muted=true;try {await video.play();}catch(error){if(card!==cards[active])return;card.classList.remove('playing');if(error.name==='NotAllowedError')$('.card-meta span',card).textContent='点击播放';}}
-function pauseCards(){cards.forEach(c=>$('video',c).pause());}
-$('#previous').addEventListener('click',()=>{setActive(active-1);playActive();});$('#next').addEventListener('click',()=>{setActive(active+1);playActive();});$('#open-current').addEventListener('click',()=>openPlayer(carouselWorks[active]));
+async function playActive(){if(mobilePreview){mobilePreview.suspend(false);return;}if(!carouselVisible||document.hidden||$('#player-dialog').open)return;const card=cards[active];if(!card)return;const video=$('video',card);if(!video.getAttribute('src')){video.src=MotionMedia.preview(carouselWorks[active]);video.load();}video.muted=true;try {await video.play();}catch(error){if(card!==cards[active])return;card.classList.remove('playing');if(error.name==='NotAllowedError')$('.card-meta span',card).textContent='点击播放';}}
+function pauseCards(){clearTimeout(playTimer);mobilePreview?.suspend();cards.forEach(c=>$('video',c).pause());}
+$('#previous').addEventListener('click',()=>{setActive(active-1);if(!mobilePreview)playActive();});$('#next').addEventListener('click',()=>{setActive(active+1);if(!mobilePreview)playActive();});$('#open-current').addEventListener('click',()=>openPlayer(carouselWorks[active]));
 $('#carousel').addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();setActive(active+(e.key==='ArrowRight'?1:-1));}});
 let pointerStart=null,dragged=false;
 $('#carousel').addEventListener('pointerdown',e=>{if(e.button!==0)return;pointerStart={x:e.clientX,y:e.clientY,id:e.pointerId};dragged=false;pauseCards();});
 $('#carousel').addEventListener('pointermove',e=>{if(!pointerStart)return;const dx=e.clientX-pointerStart.x;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(e.clientY-pointerStart.y)){dragged=true;if(!$('#carousel').hasPointerCapture(e.pointerId))$('#carousel').setPointerCapture(e.pointerId);}});
 function finishDrag(e){if(!pointerStart)return;const dx=e.clientX-pointerStart.x;if(dragged&&Math.abs(dx)>35)setActive(active+(dx<0?1:-1)*Math.max(1,Math.min(3,Math.floor(Math.abs(dx)/160))));else playActive();pointerStart=null;setTimeout(()=>dragged=false,60);}
-$('#carousel').addEventListener('pointerup',finishDrag);$('#carousel').addEventListener('pointercancel',()=>{pointerStart=null;dragged=false;});
+$('#carousel').addEventListener('pointerup',finishDrag);$('#carousel').addEventListener('pointercancel',()=>{pointerStart=null;dragged=false;if(mobilePreview)playActive();});
 $('#carousel').addEventListener('wheel',e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY)||e.shiftKey){e.preventDefault();const delta=e.deltaX||e.deltaY;if(!wheelLock&&Math.abs(delta)>5){wheelLock=true;setActive(active+(delta>0?1:-1));setTimeout(()=>wheelLock=false,420);}}},{passive:false});
 let resizeTimer,layoutWidth=innerWidth,layoutHeight=document.querySelector('.journey-sticky').offsetHeight;
 window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const height=document.querySelector('.journey-sticky').offsetHeight;if(innerWidth===layoutWidth&&height===layoutHeight)return;layoutWidth=innerWidth;layoutHeight=height;setActive(active);},150);});
-document.addEventListener('journeyvisibility',e=>{carouselVisible=!!e.detail;if(carouselVisible)playActive();else pauseCards();});
+document.addEventListener('journeyvisibility',e=>{carouselVisible=!!e.detail;if(mobilePreview)mobilePreview.setVisible(carouselVisible&&!document.hidden&&!document.querySelector('dialog[open]'));else if(carouselVisible)playActive();else pauseCards();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseCards();else playActive();});
 $('#selected-filters').addEventListener('click',e=>{const btn=e.target.closest('[data-category]');if(!btn)return;$$('button',$('#selected-filters')).forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-pressed',String(b===btn));});filtered=works.filter(w=>btn.dataset.category==='全部'||w.category===btn.dataset.category);buildCards();});
 function buildArchive(){
@@ -142,7 +153,8 @@ function buildArchive(){
   // Every original appears once; five repeats close the perspective wall without fetching extra media.
   [...works,...works.slice(0,5)].forEach((w,i)=>{const b=document.createElement('button');b.className='archive-tile';b.dataset.category=w.category;b.setAttribute('aria-label',`播放 ${w.title}，${w.category}`);if(i>=works.length){b.setAttribute('aria-hidden','true');b.tabIndex=-1;}const img=document.createElement('img');img.src=MotionMedia.poster(w);img.alt='';img.loading='lazy';img.decoding='async';const span=document.createElement('span');span.textContent=w.title+' / '+w.category;b.append(img,span);b.addEventListener('click',()=>openPlayer(w));$('#archive-wall').append(b);});
 }
-let previousFocus,playerWork,playerTimer,playerOffset=0;
+let previousFocus,playerWork,playerTimer,playerOffset=0,playerAttempt=0,playerWasPlaying=false;
+const retainedPlayer=MotionMedia.compact?MotionPlayback.createPlayer($('#full-video')):null;
 const qualityButtons=$$('[data-quality]'),qualitySwitch=$('.quality-switch');let playerQuality='smooth';$('.mobile-quality').hidden=!MotionMedia.compact;
 function playerSource(){return MotionMedia.playback(playerWork,playerQuality);}
 function changeQuality(value,restart=true){
@@ -177,21 +189,43 @@ qualitySwitch.addEventListener('click',e=>{if(Date.now()<qualityClickUntil){e.pr
 $('#full-video').addEventListener('loadedmetadata',()=>{if(playerOffset){$('#full-video').currentTime=Math.min(playerOffset,Math.max(0,$('#full-video').duration-.1));playerOffset=0;}});
 const playerStatus=$('#player-status'),retryPlayer=$('#retry-player');
 function playerMessage(message,retry=false){playerStatus.textContent=message;retryPlayer.hidden=!retry;}
-function startPlayer(reload=false){
+function startPlayer(reload=false,restart=false){
   if(!playerWork||!$('#player-dialog').open)return;
   const v=$('#full-video');clearTimeout(playerTimer);playerMessage('正在加载视频…');
-  if(reload||!v.getAttribute('src')){v.src=playerSource();$('#video-direct').href=playerSource();v.load();}
+  const attempt=++playerAttempt;
+  if(retainedPlayer){const loaded=retainedPlayer.open(playerSource(),{force:reload,restart});if(loaded&&playbackDiagnostic)v.dataset.sourceLoads=String(+(v.dataset.sourceLoads||0)+1);}
+  else if(reload||!v.getAttribute('src')){v.src=playerSource();v.load();}
+  $('#video-direct').href=playerSource();
   playerTimer=setTimeout(()=>{if($('#player-dialog').open&&(v.readyState<3||v.paused))playerMessage('加载较慢，可以重试或在浏览器中打开视频',true);},12000);
-  v.play().catch(error=>{if(error.name==='AbortError'||!$('#player-dialog').open)return;clearTimeout(playerTimer);playerMessage(error.name==='NotAllowedError'?'点按播放，开始观看':'视频暂时未能加载，请重试',true);});
+  if(v.readyState>=3)playerMessage('');
+  v.play().catch(error=>{if(attempt!==playerAttempt||error.name==='AbortError'||!$('#player-dialog').open)return;clearTimeout(playerTimer);playerMessage(error.name==='NotAllowedError'?'点按播放，开始观看':'视频暂时未能加载，请重试',true);});
 }
-function openPlayer(work){if(!work)return;previousFocus=document.activeElement;playerWork=work;playerOffset=0;changeQuality('smooth',false);pauseCards();$('#player-title').textContent=work.title;$('#player-category').textContent=work.category+' / '+timeLabel(work.duration);const v=$('#full-video');prepareInlineVideo(v);v.poster=MotionMedia.poster(work);$('#video-direct').href=playerSource();if(!$('#player-dialog').open)$('#player-dialog').showModal();startPlayer(true);}
+function openPlayer(work){if(!work)return;previousFocus=document.activeElement;playerWork=work;playerOffset=0;changeQuality('smooth',false);pauseCards();$('#player-title').textContent=work.title;$('#player-category').textContent=work.category+' / '+timeLabel(work.duration);const v=$('#full-video');prepareInlineVideo(v);v.poster=MotionMedia.poster(work);$('#video-direct').href=playerSource();if(!$('#player-dialog').open)$('#player-dialog').showModal();startPlayer(!retainedPlayer,true);}
 retryPlayer.addEventListener('click',()=>startPlayer(!!$('#full-video').error||$('#full-video').readyState===0));
 $('#full-video').addEventListener('playing',()=>{clearTimeout(playerTimer);playerMessage('');});
 $('#full-video').addEventListener('error',()=>{if($('#player-dialog').open){clearTimeout(playerTimer);playerMessage('视频未能加载，请重试或直接打开',true);}});
 // A real touch is required by some embedded browsers even for muted previews.
-document.addEventListener('touchend',()=>playActive(),{passive:true});
+document.addEventListener('touchend',e=>{if(!mobilePreview)playActive();else if(previewNeedsGesture&&carouselVisible&&!document.querySelector('dialog[open]')&&e.target.closest('#carousel'))mobilePreview.start();},{passive:true});
 document.addEventListener('WeixinJSBridgeReady',()=>playActive());
 function closePlayer(){if($('#player-dialog').open)$('#player-dialog').close();}
 $('#close-player').addEventListener('click',closePlayer);$('#player-dialog').addEventListener('click',e=>{if(e.target===$('#player-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closePlayer();}});
-$('#player-dialog').addEventListener('close',()=>{clearTimeout(playerTimer);playerWork=null;const v=$('#full-video');v.pause();v.removeAttribute('src');v.load();previousFocus?.focus({preventScroll:true});playActive();});
+$('#player-dialog').addEventListener('close',()=>{clearTimeout(playerTimer);playerAttempt++;playerWasPlaying=false;playerWork=null;const v=$('#full-video');if(retainedPlayer)retainedPlayer.close();else{v.pause();v.removeAttribute('src');v.load();}previousFocus?.focus({preventScroll:true});playActive();});
+if(mobilePreview){
+  let scrollTimer,lastPlaybackY=scrollY;
+  window.addEventListener('scroll',()=>{
+    if(Math.abs(scrollY-lastPlaybackY)<1)return;lastPlaybackY=scrollY;
+    clearTimeout(scrollTimer);mobilePreview.setBusy(true);document.documentElement.classList.add('mobile-scroll-active');
+    scrollTimer=setTimeout(()=>{document.documentElement.classList.remove('mobile-scroll-active');mobilePreview.setBusy(false);},220);
+  },{passive:true});
+  // Contact/player overlays and background tabs share the same exclusion policy.
+  const syncPreview=()=>mobilePreview.setVisible(carouselVisible&&!document.hidden&&!document.querySelector('dialog[open]'));
+  for(const dialog of $$('dialog'))new MutationObserver(syncPreview).observe(dialog,{attributes:true,attributeFilter:['open']});
+  document.addEventListener('visibilitychange',()=>{
+    syncPreview();const v=$('#full-video');
+    if(document.hidden){playerWasPlaying=$('#player-dialog').open&&!v.paused;v.pause();}
+    else if(playerWasPlaying&&$('#player-dialog').open){playerWasPlaying=false;startPlayer();}
+  });
+  window.addEventListener('pagehide',()=>{playerWasPlaying=$('#player-dialog').open&&!$('#full-video').paused;mobilePreview.release();retainedPlayer.release();});
+  window.addEventListener('pageshow',event=>{if(event.persisted){mobilePreview.setItems(cards.map((card,i)=>({card,video:$('video',card),src:MotionMedia.preview(carouselWorks[i])})));mobilePreview.select(active);syncPreview();if(playerWork&&$('#player-dialog').open){retainedPlayer.open(playerSource());if(playerWasPlaying)startPlayer();playerWasPlaying=false;}}});
+}
 fetch('works.json?v=13').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(data=>{works=data;filtered=works;buildCards();buildArchive();document.dispatchEvent(new CustomEvent('motionworksready',{detail:works}));}).catch(()=>{toast('作品列表未能加载，请刷新页面');$('#current-title').textContent='作品加载失败';});

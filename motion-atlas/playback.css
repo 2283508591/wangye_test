@@ -1,0 +1,2 @@
+/* Stop decorative ribbons while the phone is panning; posters stay at full quality. */
+.compact-media.mobile-scroll-active .mobile-art-track{animation-play-state:paused}
