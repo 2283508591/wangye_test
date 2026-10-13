@@ -850,5 +850,53 @@
     "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/mobile-v11/work-19.webp",
     "size": 32766,
     "sha256": "aa965300eb938a414a383702fb5a87976a0b58d65de406871a7a384b66e97541"
+  },
+  {
+    "path": "assets/hero-stills/earbuds-desktop.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/earbuds-desktop.webp",
+    "sha256": "451d8e295bead8242ff7305dce6d9a5e728c6819b82dc3af711350301d6b0eb1",
+    "size": 414682
+  },
+  {
+    "path": "assets/hero-stills/earbuds-mobile.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/earbuds-mobile.webp",
+    "sha256": "20a44d14416972bbd3eaf2f687d7ddb0ba8b40cc3cc82f480312d293c07b4fe6",
+    "size": 430434
+  },
+  {
+    "path": "assets/hero-stills/f10-desktop.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/f10-desktop.webp",
+    "sha256": "b341ceccd3be9031a5b14a7695e6ca17fae63fb032ee01ac436110e9ddadff8d",
+    "size": 437560
+  },
+  {
+    "path": "assets/hero-stills/f10-mobile.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/f10-mobile.webp",
+    "sha256": "c9a1f7abfa94d382fe1acf1f02fbca0634368a09ab161a92a99155f96d71435d",
+    "size": 464004
+  },
+  {
+    "path": "assets/hero-stills/fan-desktop.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/fan-desktop.webp",
+    "sha256": "018b7cb2ccd489d67ce3f67858d269210544633ffda77634788382574e730c17",
+    "size": 450332
+  },
+  {
+    "path": "assets/hero-stills/fan-mobile.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/fan-mobile.webp",
+    "sha256": "7988a77d3f384883dee77901bae59b2de2fb21b45f0529a99e613f716856b31a",
+    "size": 457126
+  },
+  {
+    "path": "assets/hero-stills/phone-desktop.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/phone-desktop.webp",
+    "sha256": "0206fe5a0b816a1de14e91975c4636e9fffa8a06c93b5c77bf33ba9aabd6c5ed",
+    "size": 442600
+  },
+  {
+    "path": "assets/hero-stills/phone-mobile.webp",
+    "url": "https://motion-atlas-xiaohulu.new-sun-9171.chatgpt.site/assets/hero-stills/phone-mobile.webp",
+    "sha256": "2dfb0b437a45ade0f9ba1e4bf78f5770e03891e6511672e9cf78b1e2f87242d2",
+    "size": 457476
   }
 ]
